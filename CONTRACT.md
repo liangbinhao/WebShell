@@ -159,3 +159,34 @@ web/
 │   └── types.ts              # 与契约一致的类型
 └── vite.config.ts            # proxy: /api -> localhost:8000, /ws -> ws://localhost:8000
 ```
+
+## 8. 环境与脚本（项目级约定）
+
+### 8.1 Python 环境
+
+* 后端虚拟环境用 **uv** 创建，Python 版本固定 **3.11**（`/opt/homebrew/bin/uv` 已安装）。
+* 命令约定（在 `backend/` 下执行）：
+
+  ```sh
+  uv python install 3.11   # 如无 3.11 解释器
+  uv venv --python 3.11    # 创建 backend/.venv
+  uv pip install -r requirements.txt
+  uv run pytest            # 运行测试
+  uv run uvicorn app.main:app --host 127.0.0.1 --port 8000  # 启动后端
+  ```
+
+* 前端无此要求（npm 管理）。
+
+### 8.2 项目脚本（WebShell 根目录）
+
+项目根目录必须提供四个脚本，覆盖后端与前端：
+
+| 脚本 | 行为 | 要求 |
+|---|---|---|
+| `build.sh` | 安装依赖并构建 | 后端：`uv pip install -r backend/requirements.txt`；前端：`npm install && npm run build`（在 web/ 下）；可重复执行 |
+| `run.sh` | 启动后端 + 前端 | 启动后端（uv run uvicorn 127.0.0.1:8000）与前端（dev 或静态服务）；记录 PID 到 `.run/` 目录；可重复执行（先 stop 旧的） |
+| `stop.sh` | 停止后端与前端 | 按 `.run/` 中记录的 PID 停止；无残留进程 |
+| `clean.sh` | 清理生成物 | 删除 backend/.venv、web/node_modules、web/dist、.run/、缓存与生成文件；**不删除源码** |
+
+约定：脚本 `set -euo pipefail`、`chmod +x`、从项目根目录执行、无交互提示（CI 友好）。
+
