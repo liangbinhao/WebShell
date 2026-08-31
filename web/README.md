@@ -2,7 +2,7 @@
 
 React 18 + Vite + TypeScript + xterm.js + shadcn/ui(Tailwind) 实现的前端。
 
-## 一键构建（供项目根目录 build.sh 调用）
+## 一键构建（供项目根目录 script/build.sh 调用）
 
 ```bash
 cd web
@@ -12,7 +12,7 @@ npm run build    # tsc --noEmit 类型检查 + vite 产物构建（输出 dist/�
 
 即：**`npm install && npm run build`** 一条命令完成构建（CI 友好、可重复执行）。
 
-## 开发启动（供项目根目录 run.sh 调用）
+## 开发启动（供项目根目录 script/run.sh 调用）
 
 ```bash
 cd web
@@ -34,13 +34,15 @@ npm run dev
 | 网络 | 安装依赖走 npmmirror 镜像（`web/.npmrc`）；如机器 `~/.npm` 缓存损坏（root 属主），本项目使用本地缓存 `web/.npm-cache` 规避，无需额外配置 |
 | 环境变量 | 前端本身无需任何环境变量；全部连接目标（8000/5173）由 `vite.config.ts` 固定 |
 
-## 项目级脚本（WebShell 根目录，CONTRACT.md §8.2）
+## 项目级脚本（WebShell/script/ 目录，CONTRACT.md §8.2）
+
+四个脚本统一放在项目根目录的 `script/` 下，从项目根目录执行：
 
 ```bash
-./build.sh   # 安装依赖并构建（uv 后端依赖 + npm 前端）
-./run.sh     # 启动后端(8000) + 前端(5173)，PID 记录到 .run/
-./stop.sh    # 按 .run/ 停止后端与前端
-./clean.sh   # 清理 backend/.venv、web/node_modules、web/dist、.run/ 等（不删源码）
+./script/build.sh   # 安装依赖并构建（uv 后端依赖 + npm 前端）
+./script/run.sh     # 启动后端(8000) + 前端(5173)，PID 记录到 .run/
+./script/stop.sh    # 按 .run/ 停止后端与前端
+./script/clean.sh   # 清理 backend/.venv、web/node_modules、web/dist、.run/ 等（不删源码）
 ```
 
 ## 目录结构

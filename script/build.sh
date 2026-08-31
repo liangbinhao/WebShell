@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # build.sh —— 安装依赖并构建（后端：uv + Python 3.11；前端：npm install + npm run build）
-# 用法：./build.sh  （可重复执行）
+# 用法：./script/build.sh  （可重复执行）
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 # ---- uv 定位 ----
@@ -53,4 +53,4 @@ echo ""
 echo "==> 构建完成："
 echo "    后端 venv  backend/.venv  （$("$ROOT/backend/.venv/bin/python" --version 2>&1)）"
 echo "    前端构建  web/dist/"
-echo "    启动：./run.sh   停止：./stop.sh   清理：./clean.sh"
+echo "    启动：./script/run.sh   停止：./script/stop.sh   清理：./script/clean.sh"

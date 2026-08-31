@@ -177,9 +177,9 @@ web/
 
 * 前端无此要求（npm 管理）。
 
-### 8.2 项目脚本（WebShell 根目录）
+### 8.2 项目脚本（WebShell/script/ 目录）
 
-项目根目录必须提供四个脚本，覆盖后端与前端：
+四个脚本统一放在 `script/` 目录下（`script/build.sh` / `script/run.sh` / `script/stop.sh` / `script/clean.sh`），从项目根目录或任意位置以 `./script/xxx.sh` 调用（脚本内部自行定位项目根目录）：
 
 | 脚本 | 行为 | 要求 |
 |---|---|---|
@@ -188,5 +188,5 @@ web/
 | `stop.sh` | 停止后端与前端 | 按 `.run/` 中记录的 PID 停止；无残留进程 |
 | `clean.sh` | 清理生成物 | 删除 backend/.venv、web/node_modules、web/dist、.run/、缓存与生成文件；**不删除源码** |
 
-约定：脚本 `set -euo pipefail`、`chmod +x`、从项目根目录执行、无交互提示（CI 友好）。
+约定：脚本 `set -euo pipefail`、`chmod +x`、可从项目根目录执行、无交互提示（CI 友好）。
 
