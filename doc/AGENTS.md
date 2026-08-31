@@ -6,7 +6,7 @@
 
 ### 0. 项目技术栈与结构
 
-本项目为 **Web SSH Workspace**（个人 Web SSH 运维工作台），需求以 `requirements.md` 为准。
+本项目为 **Web SSH Workspace**（个人 Web SSH 运维工作台），需求以 `doc/requirements.md` 为准。
 
 技术栈：
 
@@ -14,7 +14,7 @@
 * 后端：Python + FastAPI + WebSocket + AsyncSSH
 * 前后端分离：后端仅提供 REST API 与 WebSocket，不渲染页面
 
-后端建议目录结构（`requirements.md` §20.3）：
+后端建议目录结构（`doc/requirements.md` §20.3）：
 
 ```text
 app/
@@ -38,7 +38,7 @@ app/
 
 * 终端交互必须基于 **PTY / interactive shell**，禁止退化为 `ssh exec command` 一次性执行；
 * 服务器配置、命令库、历史记录三块数据彼此解耦；
-* 新代码遵循 `requirements.md` 的模块划分，不得为局部方便破坏结构约定。
+* 新代码遵循 `doc/requirements.md` 的模块划分，不得为局部方便破坏结构约定。
 
 ### 1. General Rules
 
@@ -86,13 +86,13 @@ app/
 
 ### 4.1 开发流程约定
 
-功能开发按以下顺序推进（参照 `requirements.md`）：
+功能开发按以下顺序推进（参照 `doc/requirements.md`）：
 
 1. 定位需求文档对应章节（功能需求 → 验收标准）；
 2. 明确接口契约：REST 路径、WebSocket 消息格式、数据模型；
 3. 后端先行实现（API / WebSocket / SSH 会话），再实现前端对接；
 4. 实现后补充或更新测试；
-5. 更新受影响的文档（`requirements.md` 或本文件）。
+5. 更新受影响的文档（`doc/requirements.md` 或本文件）。
 
 约定：
 
