@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# stop.sh —— 按 .run/ 中记录的 PID 停止后端与前端（CONTRACT.md §8.2）
-# 无残留进程；可重复执行。
+# stop.sh —— 停止后端与前端进程（优先按 .run/ 记录的 PID；兜底按进程特征匹配）
+# 用法：./stop.sh（可重复执行，无残留）
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,9 +9,7 @@ RUN_DIR="$ROOT/.run"
 stop_one() {
   local name="$1"
   local pid_file="$RUN_DIR/$name.pid"
-  if [ ! -f "$pid_file" ]; then
-    return 0
-  fi
+  [ -f "$pid_file" ] || return 0
   local pid
   pid="$(cat "$pid_file" 2>/dev/null || true)"
   rm -f "$pid_file"
@@ -23,7 +21,6 @@ stop_one() {
 
   echo "==> 停止 $name (pid $pid)"
   kill "$pid" 2>/dev/null || true
-  # 顺带终止其直接子进程（如 npm/vite 包装进程）
   pkill -P "$pid" 2>/dev/null || true
 
   # 等待退出（最多 3 秒）
@@ -44,12 +41,9 @@ stop_one() {
 stop_one backend
 stop_one frontend
 
-# 兜底：按项目专属命令行模式清理残留进程（不影响其他项目/无关进程）
-pkill -f "\.venv/bin/uvicorn app\.main:app --host 127\.0\.0\.1 --port 8000" 2>/dev/null || true
-pkill -f "node \./node_modules/\.bin/vite --host 127\.0\.0\.1 --port 5173" 2>/dev/null || true
+# 兜底：按本项目专属命令行特征清理残留（不影响其他项目/无关进程）
+pkill -f "uvicorn app\.main:app --host 127\.0\.0\.1 --port 8000" 2>/dev/null || true
+pkill -f "vite --host 127\.0\.0\.1 --port 5173" 2>/dev/null || true
 
-if compgen -G "$RUN_DIR/*.pid" >/dev/null 2>&1; then
-  rm -f "$RUN_DIR"/*.pid
-fi
-
+rm -f "$RUN_DIR"/*.pid 2>/dev/null || true
 echo "==> 全部服务已停止"

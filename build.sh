@@ -1,33 +1,56 @@
 #!/usr/bin/env bash
-# build.sh —— 安装依赖并构建（CONTRACT.md §8.2）
-# 后端：uv pip install -r backend/requirements.txt
-# 前端：npm install && npm run build（在 web/ 下）
-# 可重复执行；从项目根目录运行；无交互提示（CI 友好）。
+# build.sh —— 安装依赖并构建（后端：uv + Python 3.11；前端：npm install + npm run build）
+# 用法：./build.sh  （可重复执行）
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
-# 本机 ~/.cache/uv、~/.local/share/uv 可能存在 root 属主文件导致 uv 报 EPERM，
-# 缓存与托管 Python 均改用项目本地目录（对正常机器无影响）
-export UV_CACHE_DIR="${UV_CACHE_DIR:-$ROOT/.uv-cache}"
-export UV_PYTHON_DIR="${UV_PYTHON_DIR:-$ROOT/.uv-python}"
-export UV_PYTHON_INSTALL_DIR="${UV_PYTHON_INSTALL_DIR:-$ROOT/.uv-python}"
-
-echo "==> [backend] 安装依赖 (uv)"
-if command -v uv >/dev/null 2>&1; then
-  if [ ! -d backend/.venv ]; then
-    echo "   创建 backend/.venv (Python 3.11)"
-    (cd backend && uv venv --python 3.11)
-  fi
-  (cd backend && uv pip install -r requirements.txt)
-else
-  echo "!! 未找到 uv（期望 /opt/homebrew/bin/uv），跳过后端依赖安装"
+# ---- uv 定位 ----
+UV_BIN="${UV:-}"
+if [ -z "$UV_BIN" ] && command -v uv >/dev/null 2>&1; then
+  UV_BIN="$(command -v uv)"
 fi
+if [ -z "$UV_BIN" ] && [ -x /opt/homebrew/bin/uv ]; then
+  UV_BIN=/opt/homebrew/bin/uv
+fi
+if [ -z "$UV_BIN" ]; then
+  echo "!! 未找到 uv，请先安装（brew install uv）" >&2
+  exit 1
+fi
+echo "==> 使用 uv：$UV_BIN"
+UV_VERSION="$("$UV_BIN" --version 2>/dev/null || echo '?')"
+echo "    version: $UV_VERSION"
 
-echo "==> [frontend] npm install && npm run build (web/)"
-(cd web && npm install && npm run build)
+# ---- 缓存与托管 Python 均用项目本地目录（避免写 ~/.cache/uv 等系统目录）----
+export UV_CACHE_DIR="${UV_CACHE_DIR:-$ROOT/.uv-cache}"
+export UV_PYTHON_INSTALL_DIR="${UV_PYTHON_INSTALL_DIR:-$ROOT/.uv-python}"
+export UV_PYTHON_BIN_DIR="${UV_PYTHON_BIN_DIR:-$ROOT/.uv-python/bin}"
 
-echo "==> 构建完成"
-echo "    - 后端依赖: backend/.venv"
-echo "    - 前端产物: web/dist"
+echo "==> [1/3] 后端依赖（uv + Python 3.11）"
+# 如无 3.11 解释器则安装（已在则跳过）
+if ! "$UV_BIN" python find 3.11 >/dev/null 2>&1; then
+  "$UV_BIN" python install 3.11
+fi
+(
+  cd backend
+  # 可重复执行：已有 3.11 的 .venv 则复用，否则（重建/换版本）用 --clear 重建
+  if [ -x .venv/bin/python ] && .venv/bin/python -c 'import sys; sys.exit(0 if sys.version_info[:2] == (3, 11) else 1)' >/dev/null 2>&1; then
+    echo "    复用现有 backend/.venv（Python 3.11）"
+  else
+    "$UV_BIN" venv --python 3.11 .venv --clear
+  fi
+  "$UV_BIN" pip install --python .venv -r requirements.txt
+)
+
+echo "==> [2/3] 前端依赖（npm install）"
+(cd web && npm install)
+
+echo "==> [3/3] 前端构建（npm run build）"
+(cd web && npm run build)
+
+echo ""
+echo "==> 构建完成："
+echo "    后端 venv  backend/.venv  （$("$ROOT/backend/.venv/bin/python" --version 2>&1)）"
+echo "    前端构建  web/dist/"
+echo "    启动：./run.sh   停止：./stop.sh   清理：./clean.sh"
