@@ -23,17 +23,18 @@
 
 ```text
 WebShell/
-├── doc/                # 文档（需求、契约、规范）
-│   ├── requirements.md # 需求规格说明书
-│   ├── CONTRACT.md     # 前后端接口契约（REST + WebSocket 消息格式 + 环境脚本约定）
-│   └── AGENTS.md       # Agent 开发规范
-├── script/             # 项目脚本
-│   ├── build.sh        # 安装依赖并构建
-│   ├── run.sh          # 启动后端 + 前端
-│   ├── stop.sh         # 停止服务
-│   └── clean.sh        # 清理生成物
-├── backend/            # FastAPI 后端（app/ + tests/ + scripts/）
-└── web/                # React 前端
+├── AGENTS.md            # Agent 开发规范（项目根目录，agent 自动读取）
+├── README.md
+├── doc/                 # 文档
+│   ├── requirements.md  # 需求规格说明书
+│   └── CONTRACT.md      # 前后端接口契约（REST + WebSocket 消息格式 + 环境脚本约定）
+├── script/              # 项目脚本
+│   ├── build.sh         # 安装依赖并构建
+│   ├── run.sh           # 启动后端 + 前端
+│   ├── stop.sh          # 停止服务
+│   └── clean.sh         # 清理生成物
+├── backend/             # FastAPI 后端（app/ + tests/ + scripts/）
+└── web/                 # React 前端
 ```
 
 ## 快速开始
@@ -63,7 +64,7 @@ cd backend && PYTHONPATH=. .venv/bin/python scripts/e2e_ssh_ws.py   # 真实 SSH
 
 - 需求与验收标准：[doc/requirements.md](doc/requirements.md)
 - 前后端接口契约（含环境与脚本约定）：[doc/CONTRACT.md](doc/CONTRACT.md)
-- Agent 开发规范：[doc/AGENTS.md](doc/AGENTS.md)
+- Agent 开发规范：[AGENTS.md](AGENTS.md)
 - 前端说明：[web/README.md](web/README.md)
 
 ## 已知限制
