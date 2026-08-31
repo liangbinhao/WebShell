@@ -25,9 +25,13 @@
 WebShell/
 ├── AGENTS.md            # Agent 开发规范（项目根目录，agent 自动读取）
 ├── README.md
+├── CHANGELOG.md         # 版本变更记录
+├── SECURITY.md          # 安全模型与注意事项
+├── LICENSE              # Apache-2.0
 ├── doc/                 # 文档
 │   ├── requirements.md  # 需求规格说明书
-│   └── CONTRACT.md      # 前后端接口契约（REST + WebSocket 消息格式 + 环境脚本约定）
+│   ├── CONTRACT.md      # 前后端接口契约（REST + WebSocket 消息格式 + 环境脚本约定）
+│   └── API.md           # 面向使用者的接口参考（REST + WebSocket）
 ├── script/              # 项目脚本
 │   ├── build.sh         # 安装依赖并构建
 │   ├── run.sh           # 启动后端 + 前端
@@ -39,18 +43,30 @@ WebShell/
 
 ## 快速开始
 
-前置条件：Node ≥ 18、uv（`brew install uv`）。
+前置条件：**Node ≥ 18**、**uv**（macOS：`brew install uv`；其他平台见 [uv 文档](https://docs.astral.sh/uv/)）。
+
+### 从 GitHub 克隆
 
 ```bash
-./script/build.sh   # 安装依赖并构建（uv 后端 venv + npm 前端）
-./script/run.sh     # 启动：后端 http://127.0.0.1:8000 + 前端 http://127.0.0.1:5173
+git clone <仓库地址> WebShell
+cd WebShell
+./script/build.sh   # ① 安装依赖并构建（uv 后端 venv + npm 前端，首次需数分钟）
+./script/run.sh     # ② 启动：后端 http://127.0.0.1:8000 + 前端 http://127.0.0.1:5173
 ```
 
-打开 **http://127.0.0.1:5173**，在左栏添加服务器即可连接。
+打开 **http://127.0.0.1:5173**：
+
+1. 左栏 **Servers** 点击 **添加**，填写服务器信息（名称、Host、端口、用户名、认证方式）
+2. 点击服务器即打开终端 Tab，开始操作
+
+> **首次连接新服务器会失败**：Host key 校验默认开启（安全设计）。按终端提示执行
+> `ssh-keyscan -p <port> <host> >> ~/.ssh/known_hosts` 后重试即可。
+
+### 停止与清理
 
 ```bash
 ./script/stop.sh    # 停止服务
-./script/clean.sh   # 清理生成物（.venv / node_modules / dist 等，不删源码）
+./script/clean.sh   # 清理生成物（.venv / node_modules / dist / 数据目录，不删源码）
 ```
 
 ## 测试
@@ -64,8 +80,12 @@ cd backend && PYTHONPATH=. .venv/bin/python scripts/e2e_ssh_ws.py   # 真实 SSH
 
 - 需求与验收标准：[doc/requirements.md](doc/requirements.md)
 - 前后端接口契约（含环境与脚本约定）：[doc/CONTRACT.md](doc/CONTRACT.md)
+- **API 接口参考（REST + WebSocket）**：[doc/API.md](doc/API.md)
 - Agent 开发规范：[AGENTS.md](AGENTS.md)
+- 后端说明：[backend/README.md](backend/README.md)
 - 前端说明：[web/README.md](web/README.md)
+- 安全模型：[SECURITY.md](SECURITY.md)
+- 版本记录：[CHANGELOG.md](CHANGELOG.md)
 
 ## 已知限制
 
