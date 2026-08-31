@@ -4,6 +4,42 @@
 
 本文件定义当前项目中 AI Agent 的通用工作规范。
 
+### 0. 项目技术栈与结构
+
+本项目为 **Web SSH Workspace**（个人 Web SSH 运维工作台），需求以 `requirements.md` 为准。
+
+技术栈：
+
+* 前端：React（Vite + TypeScript）+ xterm.js + shadcn/ui（Tailwind CSS）
+* 后端：Python + FastAPI + WebSocket + AsyncSSH
+* 前后端分离：后端仅提供 REST API 与 WebSocket，不渲染页面
+
+后端建议目录结构（`requirements.md` §20.3）：
+
+```text
+app/
+├── main.py
+├── api/
+├── websocket/
+├── ssh/
+│   ├── manager.py
+│   ├── session.py
+│   └── connection.py
+├── commands/
+├── servers/
+├── models/
+├── config/
+└── utils/
+```
+
+前端建议按功能模块组织组件（三栏布局：Servers / Terminal Tabs / Commands）。
+
+开发约束：
+
+* 终端交互必须基于 **PTY / interactive shell**，禁止退化为 `ssh exec command` 一次性执行；
+* 服务器配置、命令库、历史记录三块数据彼此解耦；
+* 新代码遵循 `requirements.md` 的模块划分，不得为局部方便破坏结构约定。
+
 ### 1. General Rules
 
 * 开始工作前，先阅读项目现有文档、代码结构和配置。
@@ -47,6 +83,24 @@
 * 测试失败时，应分析根因，而不是盲目修改测试。
 * 无法实际验证的内容必须明确说明。
 * 不得声称已经执行了实际上没有执行的测试或验证。
+
+### 4.1 开发流程约定
+
+功能开发按以下顺序推进（参照 `requirements.md`）：
+
+1. 定位需求文档对应章节（功能需求 → 验收标准）；
+2. 明确接口契约：REST 路径、WebSocket 消息格式、数据模型；
+3. 后端先行实现（API / WebSocket / SSH 会话），再实现前端对接；
+4. 实现后补充或更新测试；
+5. 更新受影响的文档（`requirements.md` 或本文件）。
+
+约定：
+
+* API 变更必须同步前端 API 层，禁止前后端各写一份不一致的契约；
+* WebSocket 消息需定义消息类型字段（如 `type`），新增类型时同步文档；
+* 前后端并行开发时，先以契约（接口定义）为准，接口变更需提前说明；
+* 涉及 SSH 会话、终端数据流的改动，必须验证断线、异常关闭等边界场景；
+* 完成一个功能模块后再开始下一个，避免多个半成品模块堆积。
 
 ### 5. Dependencies
 
