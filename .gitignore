@@ -17,3 +17,17 @@ build/
 
 # OS
 .DS_Store
+
+# backend data (encrypted secrets, keys)
+backend/data/
+backend/.venv/
+
+# run state (PIDs / logs written by run.sh)
+.run/
+
+# project-local uv cache / managed python (build.sh)
+.uv-cache/
+.uv-python/
+
+# frontend local npm cache (web/.npmrc cache=./.npm-cache)
+web/.npm-cache/
