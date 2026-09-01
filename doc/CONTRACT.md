@@ -190,3 +190,14 @@ web/
 
 约定：脚本 `set -euo pipefail`、`chmod +x`、可从项目根目录执行、无交互提示（CI 友好）。
 
+### 8.3 跨平台（Windows / macOS / Linux）
+
+* 脚本在 Windows 上需在 **Git Bash** 中执行（CMD/PowerShell 不适用）。
+* 公共逻辑集中在 `script/lib.sh`（各脚本 source 引入）：
+  * `is_windows`：按 `uname` 识别 MSYS/Git Bash/Cygwin；
+  * `ensure_utf8_console`：Windows 下执行 `chcp 65001` 切 UTF-8 代码页，避免中文日志乱码；
+  * `venv_python <dir>`：跨平台定位 venv 内 python（Unix `bin/python` / Windows `Scripts/python.exe`）；
+  * `find_uv`：定位 uv（环境变量 > PATH > macOS Homebrew）。
+* `run.sh` 设置 `PYTHONIOENCODING=utf-8` 与 `PYTHONUTF8=1`，保证 Windows 下后端日志文件为 UTF-8。
+* 前端 vite 二进制跨平台定位：Unix `web/node_modules/.bin/vite`，Windows `web/node_modules/.bin/vite.cmd`。
+

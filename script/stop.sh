@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 # stop.sh —— 停止后端与前端进程（优先按 .run/ 记录的 PID；兜底按进程特征匹配）
-# 用法：./stop.sh（可重复执行，无残留）
+# 跨平台：Windows（Git Bash）/ macOS / Linux
+# 用法：./script/stop.sh（可重复执行，无残留）
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RUN_DIR="$ROOT/.run"
+# ---- 加载公共库 ----
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib.sh
+source "$SCRIPT_DIR/lib.sh"
+ensure_utf8_console
+RUN_DIR="$(run_dir)"
 
 stop_one() {
   local name="$1"

@@ -43,7 +43,9 @@ WebShell/
 
 ## 快速开始
 
-前置条件：**Node ≥ 18**、**uv**（macOS：`brew install uv`；其他平台见 [uv 文档](https://docs.astral.sh/uv/)）。
+前置条件：**Node ≥ 18**、**uv**（macOS：`brew install uv`；Windows：见 [uv 文档](https://docs.astral.sh/uv/)）。
+
+> **Windows 用户**：`script/` 下的脚本需要 **Git Bash** 环境执行（CMD/PowerShell 不适用）。脚本已做跨平台适配：自动识别 Windows venv 路径（`.venv/Scripts/python.exe`）与 vite 命令（`.bin/vite.cmd`），并自动将控制台切换为 UTF-8（`chcp 65001`）避免中文日志乱码。
 
 ### 从 GitHub 克隆
 
@@ -73,7 +75,7 @@ cd WebShell
 
 ```bash
 cd backend && uv run pytest        # 93 个用例（单元 + SSH mock + WebSocket）
-cd backend && PYTHONPATH=. .venv/bin/python scripts/e2e_ssh_ws.py   # 真实 SSH 端到端
+cd backend && PYTHONPATH=. uv run python scripts/e2e_ssh_ws.py   # 真实 SSH 端到端（跨平台）
 ```
 
 ## 文档索引
