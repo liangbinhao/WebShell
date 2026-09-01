@@ -494,6 +494,20 @@ Workspace
 * Terminal 区域应尽可能占据主要空间；
 * 浏览器窗口尺寸变化时 Terminal 能够自适应。
 
+## 15.1 终端显示设置（已实现）
+
+终端提供显示设置（右栏「设置」Tab，全局生效、localStorage 持久化）：
+
+* **字体大小**：10–20px 可调（滑块 + +/- 按钮），xterm `options.fontSize` 实时生效并重算网格；
+* **字体**：7 种预置等宽字体（JetBrains Mono / Fira Code / Cascadia Code / Source Code Pro / Consolas / Courier New / 系统默认），xterm `options.fontFamily`；
+* **配色方案**：3 套预置（暗色默认 / 亮色 / 绿色 CRT），xterm `options.theme`（含 ANSI 16 色），带预览卡片。
+
+实现约定：
+
+* 设置存于浏览器 `localStorage`（key `ws-terminal-settings`），刷新保留；
+* 设置变更通过 `term.options` 运行时更新，不重建终端；字号/字体变化后 `fit()` 重算行列数并同步远程 PTY；
+* 所有终端 Tab 共享同一套设置（全局生效）。
+
 ---
 
 # 16. 配置管理

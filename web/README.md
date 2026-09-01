@@ -57,16 +57,28 @@ web/src
 │   ├── ServersPanel.tsx    # 左栏：服务器列表 + CRUD + 收藏
 │   ├── ServerFormDialog.tsx
 │   ├── TerminalTabs.tsx    # 中栏：多 Tab 终端
-│   ├── Terminal.tsx        # xterm.js 封装（WS 生命周期 / resize / 历史识别）
+│   ├── Terminal.tsx        # xterm.js 封装（WS 生命周期 / resize / 历史识别 / 显示设置）
 │   ├── CommandsPanel.tsx   # 右栏：命令库（分类分组 + 模板）
 │   ├── CommandFormDialog.tsx
 │   ├── TemplateDialog.tsx  # {参数名} 模板参数表单
 │   ├── HistoryPanel.tsx    # 右栏 Tab：命令历史（搜索/删除/重插）
+│   ├── SettingsPanel.tsx   # 右栏 Tab：终端显示设置（字号/字体/配色）
 │   ├── RightPanel.tsx
 │   └── ui/                 # shadcn/ui 组件（button/dialog/select/tabs/...）
-├── lib/                    # cn / 时间格式化 / 模板占位符解析
+├── lib/                    # cn / 时间格式化 / 模板占位符解析 / terminal-settings
 └── types.ts                # 与 CONTRACT.md §2 一致的模型类型
 ```
+
+## 终端显示设置
+
+右栏「设置」Tab（见需求 §15.1）：
+
+- **字体大小**：10–20px（滑块 + +/-），`term.options.fontSize` 实时生效
+- **字体**：7 种预置等宽字体，`term.options.fontFamily`
+- **配色方案**：暗色默认 / 亮色 / 绿色 CRT（含 ANSI 16 色），`term.options.theme`
+- 持久化：`localStorage`（key `ws-terminal-settings`），全局共享，运行时更新不重建终端
+
+相关文件：`src/lib/terminal-settings.ts`（类型/默认值/预置）、`src/components/SettingsPanel.tsx`（UI）。
 
 ## 说明
 
