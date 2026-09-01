@@ -6,6 +6,11 @@ import { RightPanel } from './components/RightPanel';
 import { historyApi } from './api/client';
 import type { TabItem } from './components/TerminalTabs';
 import type { Server } from './types';
+import {
+  loadSettings,
+  saveSettings,
+  type TerminalSettings,
+} from './lib/terminal-settings';
 import { cn } from '@/lib/utils';
 
 interface ToastState {
@@ -20,6 +25,15 @@ export default function App() {
   const [rightOpen, setRightOpen] = useState(true);
   const [toast, setToast] = useState<ToastState | null>(null);
   const toastTimerRef = useRef<number | undefined>(undefined);
+  /** 终端显示设置（localStorage 持久化，全局生效） */
+  const [terminalSettings, setTerminalSettings] = useState<TerminalSettings>(
+    loadSettings,
+  );
+
+  const handleSettingsChange = useCallback((next: TerminalSettings) => {
+    setTerminalSettings(next);
+    saveSettings(next);
+  }, []);
 
   const showToast = useCallback((text: string, kind: 'success' | 'error' = 'success') => {
     setToast({ text, kind });
@@ -109,14 +123,17 @@ export default function App() {
           ref={terminalTabsRef}
           className="min-w-0 flex-1"
           onHistoryRecord={handleHistoryRecord}
+          settings={terminalSettings}
         />
 
-        {/* 右栏：命令库 + 历史 */}
+        {/* 右栏：命令库 + 历史 + 设置 */}
         {rightOpen ? (
           <RightPanel
             onInsert={handleInsert}
             onCollapse={() => setRightOpen(false)}
             showToast={showToast}
+            settings={terminalSettings}
+            onSettingsChange={handleSettingsChange}
           />
         ) : (
           <button

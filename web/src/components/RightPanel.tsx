@@ -2,16 +2,27 @@ import { ChevronRight } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { CommandsPanel } from './CommandsPanel';
 import { HistoryPanel } from './HistoryPanel';
+import { SettingsPanel } from './SettingsPanel';
+import type { TerminalSettings } from '../lib/terminal-settings';
 
 interface RightPanelProps {
   /** 插入命令/历史到当前激活终端 */
   onInsert: (content: string) => void;
   onCollapse?: () => void;
   showToast: (text: string, kind?: 'success' | 'error') => void;
+  /** 终端显示设置（设置 Tab 编辑，全局生效） */
+  settings: TerminalSettings;
+  onSettingsChange: (next: TerminalSettings) => void;
 }
 
-/** 右栏：命令库 + 历史（两个 Tab） */
-export function RightPanel({ onInsert, onCollapse, showToast }: RightPanelProps) {
+/** 右栏：命令库 + 历史 + 设置（三个 Tab） */
+export function RightPanel({
+  onInsert,
+  onCollapse,
+  showToast,
+  settings,
+  onSettingsChange,
+}: RightPanelProps) {
   return (
     <div className="flex h-full w-80 shrink-0 flex-col border-l bg-card">
       <Tabs defaultValue="commands" className="flex h-full min-h-0 flex-col">
@@ -23,6 +34,9 @@ export function RightPanel({ onInsert, onCollapse, showToast }: RightPanelProps)
             </TabsTrigger>
             <TabsTrigger value="history" className="flex-1 text-xs">
               历史
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex-1 text-xs">
+              设置
             </TabsTrigger>
           </TabsList>
           {onCollapse && (
@@ -46,6 +60,9 @@ export function RightPanel({ onInsert, onCollapse, showToast }: RightPanelProps)
           </TabsContent>
           <TabsContent value="history" className="mt-0 h-full overflow-hidden p-0">
             <HistoryPanel onInsert={onInsert} showToast={showToast} />
+          </TabsContent>
+          <TabsContent value="settings" className="mt-0 h-full overflow-hidden p-0">
+            <SettingsPanel settings={settings} onChange={onSettingsChange} />
           </TabsContent>
         </div>
       </Tabs>

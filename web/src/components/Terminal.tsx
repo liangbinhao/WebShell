@@ -5,7 +5,7 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react';
-import { Terminal as XTerm, type ITheme } from '@xterm/xterm';
+import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
 import {
@@ -13,6 +13,7 @@ import {
   type ConnectionState,
   type ServerMessage,
 } from '../api/terminal';
+import { getThemeById, type TerminalSettings } from '../lib/terminal-settings';
 
 export interface TerminalHandle {
   /** 向终端插入文本（不自动执行，用户按 Enter 执行） */
@@ -29,32 +30,9 @@ interface TerminalProps {
   onStatusChange: (state: ConnectionState, errorMessage?: string) => void;
   /** 检测到用户执行了一条命令（按 Enter） */
   onCommand: (command: string) => void;
+  /** 终端显示设置（字体大小/字体/配色，全局共享） */
+  settings: TerminalSettings;
 }
-
-// 与暗色 UI 一致的 xterm 配色
-const termTheme: ITheme = {
-  background: '#09090b',
-  foreground: '#e4e4e7',
-  cursor: '#e4e4e7',
-  cursorAccent: '#09090b',
-  selectionBackground: '#3f3f46',
-  black: '#18181b',
-  red: '#f87171',
-  green: '#4ade80',
-  yellow: '#facc15',
-  blue: '#60a5fa',
-  magenta: '#e879f9',
-  cyan: '#22d3ee',
-  white: '#d4d4d8',
-  brightBlack: '#3f3f46',
-  brightRed: '#fca5a5',
-  brightGreen: '#86efac',
-  brightYellow: '#fde047',
-  brightBlue: '#93c5fd',
-  brightMagenta: '#f0abfc',
-  brightCyan: '#67e8f9',
-  brightWhite: '#fafafa',
-};
 
 /**
  * xterm.js 终端封装：
@@ -64,7 +42,10 @@ const termTheme: ITheme = {
  * - 连接状态 -> status/error 消息驱动
  */
 const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
-  function TerminalComponent({ serverId, active, onStatusChange, onCommand }, ref) {
+  function TerminalComponent(
+    { serverId, active, onStatusChange, onCommand, settings },
+    ref,
+  ) {
     const containerRef = useRef<HTMLDivElement>(null);
     const termRef = useRef<XTerm | null>(null);
     const fitRef = useRef<FitAddon | null>(null);
@@ -229,11 +210,11 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
 
       const term = new XTerm({
         cursorBlink: true,
-        fontSize: 13,
-        fontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+        fontSize: settings.fontSize,
+        fontFamily: settings.fontFamily,
         lineHeight: 1.2,
         scrollback: 10000,
-        theme: termTheme,
+        theme: getThemeById(settings.themeId).theme,
         convertEol: false,
       });
       const fit = new FitAddon();
@@ -267,6 +248,19 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverId]);
+
+    // 设置变化时实时更新：字体大小 / 字体 / 配色（xterm options 运行时生效）
+    useEffect(() => {
+      const term = termRef.current;
+      if (!term || disposedRef.current) return;
+      term.options.fontSize = settings.fontSize;
+      term.options.fontFamily = settings.fontFamily;
+      term.options.theme = getThemeById(settings.themeId).theme;
+      // 字号/字体变化后重算网格尺寸并同步远程 PTY
+      fitTerminal();
+      // 激活 tab 时聚焦，保证调整设置后可直接输入
+      if (active) term.focus();
+    }, [settings, active, fitTerminal]);
 
     // 从隐藏切换为激活时重新 fit（display:none 期间尺寸为 0）
     useEffect(() => {
