@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { CommandsPanel } from './CommandsPanel';
 import { HistoryPanel } from './HistoryPanel';
 import { SettingsPanel } from './SettingsPanel';
-import type { TerminalSettings } from '../lib/terminal-settings';
+import type { AppearanceSettings } from '../lib/appearance';
 
 interface RightPanelProps {
   /** 插入命令/历史到当前激活终端 */
@@ -11,8 +11,8 @@ interface RightPanelProps {
   onCollapse?: () => void;
   showToast: (text: string, kind?: 'success' | 'error') => void;
   /** 终端显示设置（设置 Tab 编辑，全局生效） */
-  settings: TerminalSettings;
-  onSettingsChange: (next: TerminalSettings) => void;
+  appearance: AppearanceSettings;
+  onAppearanceChange: (next: AppearanceSettings) => void;
 }
 
 /** 右栏：命令库 + 历史 + 设置（三个 Tab） */
@@ -20,8 +20,8 @@ export function RightPanel({
   onInsert,
   onCollapse,
   showToast,
-  settings,
-  onSettingsChange,
+  appearance,
+  onAppearanceChange,
 }: RightPanelProps) {
   return (
     <div className="flex h-full w-80 shrink-0 flex-col border-l bg-card">
@@ -62,7 +62,7 @@ export function RightPanel({
             <HistoryPanel onInsert={onInsert} showToast={showToast} />
           </TabsContent>
           <TabsContent value="settings" className="mt-0 h-full overflow-hidden p-0">
-            <SettingsPanel settings={settings} onChange={onSettingsChange} />
+            <SettingsPanel appearance={appearance} onChange={onAppearanceChange} />
           </TabsContent>
         </div>
       </Tabs>

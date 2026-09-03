@@ -13,7 +13,11 @@ import {
   type ConnectionState,
   type ServerMessage,
 } from '../api/terminal';
-import { getThemeById, type TerminalSettings } from '../lib/terminal-settings';
+import {
+  getTerminalTheme,
+  resolveTerminalThemeId,
+  type AppearanceSettings,
+} from '../lib/appearance';
 
 export interface TerminalHandle {
   /** 向终端插入文本（不自动执行，用户按 Enter 执行） */
@@ -30,8 +34,8 @@ interface TerminalProps {
   onStatusChange: (state: ConnectionState, errorMessage?: string) => void;
   /** 检测到用户执行了一条命令（按 Enter） */
   onCommand: (command: string) => void;
-  /** 终端显示设置（字体大小/字体/配色，全局共享） */
-  settings: TerminalSettings;
+  /** 全局外观设置（UI 主题/缩放/终端显示，见 lib/appearance.ts） */
+  appearance: AppearanceSettings;
 }
 
 /**
@@ -43,7 +47,7 @@ interface TerminalProps {
  */
 const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
   function TerminalComponent(
-    { serverId, active, onStatusChange, onCommand, settings },
+    { serverId, active, onStatusChange, onCommand, appearance },
     ref,
   ) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -244,11 +248,11 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
 
       const term = new XTerm({
         cursorBlink: true,
-        fontSize: settings.fontSize,
-        fontFamily: settings.fontFamily,
+        fontSize: appearance.terminal.fontSize,
+        fontFamily: appearance.terminal.fontFamily,
         lineHeight: 1.2,
         scrollback: 10000,
-        theme: getThemeById(settings.themeId).theme,
+        theme: getTerminalTheme(resolveTerminalThemeId(appearance)).theme,
         convertEol: false,
       });
       const fit = new FitAddon();
@@ -333,18 +337,18 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverId]);
 
-    // 设置变化时实时更新：字体大小 / 字体 / 配色（xterm options 运行时生效）
+    // 外观变化时实时更新：终端字号 / 字体 / 配色（xterm options 运行时生效）
     useEffect(() => {
       const term = termRef.current;
       if (!term || disposedRef.current) return;
-      term.options.fontSize = settings.fontSize;
-      term.options.fontFamily = settings.fontFamily;
-      term.options.theme = getThemeById(settings.themeId).theme;
+      term.options.fontSize = appearance.terminal.fontSize;
+      term.options.fontFamily = appearance.terminal.fontFamily;
+      term.options.theme = getTerminalTheme(resolveTerminalThemeId(appearance)).theme;
       // 字号/字体变化后重算网格尺寸并同步远程 PTY
       fitTerminal();
       // 激活 tab 时聚焦，保证调整设置后可直接输入
       if (active) term.focus();
-    }, [settings, active, fitTerminal]);
+    }, [appearance, active, fitTerminal]);
 
     // 从隐藏切换为激活时重新 fit（display:none 期间尺寸为 0）
     useEffect(() => {

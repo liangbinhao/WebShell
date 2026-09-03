@@ -506,19 +506,27 @@ Workspace
 * Terminal 区域应尽可能占据主要空间；
 * 浏览器窗口尺寸变化时 Terminal 能够自适应。
 
-## 15.1 终端显示设置（已实现）
+## 15.1 外观系统（已实现）
 
-终端提供显示设置（右栏「设置」Tab，全局生效、localStorage 持久化）：
+提供**外观设置**（右栏「设置」Tab，localStorage 持久化，全局生效）。设计为可扩展（个人工作台方向）：后续任何功能都可读取同一份外观配置，新增 UI 主题只需在 `lib/appearance.ts` 与 `index.css` 各加一项。
 
-* **字体大小**：10–20px 可调（滑块 + +/- 按钮），xterm `options.fontSize` 实时生效并重算网格；
-* **字体**：7 种预置等宽字体（JetBrains Mono / Fira Code / Cascadia Code / Source Code Pro / Consolas / Courier New / 系统默认），xterm `options.fontFamily`；
-* **配色方案**：3 套预置（暗色默认 / 亮色 / 绿色 CRT），xterm `options.theme`（含 ANSI 16 色），带预览卡片。
+### UI 外观
 
-实现约定：
+* **界面主题**：3 套（暗色 zinc / 亮色 / 绿色 CRT）。每套 = 一组 shadcn CSS 变量 + `<html>` 上的 class（`theme-zinc-dark` / `theme-light` / `theme-crt`），切换即整个 UI（菜单/面板/文字）换肤；
+* **界面缩放**：85%–130% 整体等比缩放（CSS `zoom`，类似 DPI），文字与间距一起缩放。
 
-* 设置存于浏览器 `localStorage`（key `ws-terminal-settings`），刷新保留；
-* 设置变更通过 `term.options` 运行时更新，不重建终端；字号/字体变化后 `fit()` 重算行列数并同步远程 PTY；
-* 所有终端 Tab 共享同一套设置（全局生效）。
+### 终端显示
+
+* **终端字号**：10–20px，独立于界面缩放（xterm `options.fontSize` 实时生效并重算网格）；
+* **终端字体**：7 种预置等宽字体（xterm `options.fontFamily`）；
+* **终端配色**：`auto`（跟随界面主题）或单独指定（暗色 / 亮色 / 绿色 CRT，xterm `options.theme` 含 ANSI 16 色）。
+
+### 实现约定
+
+* 设置存于 `localStorage`（key `ws-appearance`，兼容迁移旧 `ws-terminal-settings`）；
+* UI 主题通过 `html` class + CSS 变量生效；缩放通过 `html` 的 `zoom`；
+* 终端配色 `auto` 时解析为当前 UI 主题关联的配色，切换主题即时联动；
+* 终端设置变更通过 `term.options` 运行时更新，不重建终端；字号变化后 `fit()` 重算行列数并同步远程 PTY。
 
 ---
 

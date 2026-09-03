@@ -2,30 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 应用为暗色主题（shadcn/ui dark 模式，zinc 配色） */
-@layer base {
-  :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --radius: 0.5rem;
-  }
+/* ================================================================
+   外观系统：UI 主题（shadcn/ui CSS 变量组）
+   html 上的 class 决定主题：theme-zinc-dark / theme-light / theme-crt
+   默认（无 class）为 zinc-dark，与 applyAppearanceToDom 配合。
+   ================================================================ */
+
+/* --- 暗色 zinc（默认）--- */
+:root,
+.theme-zinc-dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
+  color-scheme: dark;
+}
+
+/* --- 亮色 --- */
+.theme-light {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 5.9% 10%;
+  color-scheme: light;
+}
+
+/* --- 绿色 CRT（终端风格 UI）--- */
+.theme-crt {
+  --background: 120 25% 4%;
+  --foreground: 130 100% 60%;
+  --card: 120 25% 5%;
+  --card-foreground: 130 100% 60%;
+  --popover: 120 25% 5%;
+  --popover-foreground: 130 100% 60%;
+  --primary: 130 100% 55%;
+  --primary-foreground: 120 25% 4%;
+  --secondary: 125 20% 12%;
+  --secondary-foreground: 130 90% 70%;
+  --muted: 125 20% 12%;
+  --muted-foreground: 130 30% 55%;
+  --accent: 125 20% 14%;
+  --accent-foreground: 130 100% 75%;
+  --destructive: 0 70% 45%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 125 22% 16%;
+  --input: 125 22% 16%;
+  --ring: 130 100% 55%;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -45,7 +99,7 @@
   }
 }
 
-/* 暗色滚动条 */
+/* 滚动条随主题（用 CSS 变量，主题切换自动变色） */
 * {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--border)) transparent;

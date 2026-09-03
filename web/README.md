@@ -62,23 +62,29 @@ web/src
 │   ├── CommandFormDialog.tsx
 │   ├── TemplateDialog.tsx  # {参数名} 模板参数表单
 │   ├── HistoryPanel.tsx    # 右栏 Tab：命令历史（搜索/删除/重插）
-│   ├── SettingsPanel.tsx   # 右栏 Tab：终端显示设置（字号/字体/配色）
+│   ├── SettingsPanel.tsx   # 右栏 Tab：外观设置（界面主题/缩放/终端）
 │   ├── RightPanel.tsx
 │   └── ui/                 # shadcn/ui 组件（button/dialog/select/tabs/...）
-├── lib/                    # cn / 时间格式化 / 模板占位符解析 / terminal-settings
+├── lib/                    # cn / 时间格式化 / 模板占位符解析 / appearance（外观系统）
 └── types.ts                # 与 CONTRACT.md §2 一致的模型类型
 ```
 
-## 终端显示设置
+## 外观系统
 
 右栏「设置」Tab（见需求 §15.1）：
 
-- **字体大小**：10–20px（滑块 + +/-），`term.options.fontSize` 实时生效
-- **字体**：7 种预置等宽字体，`term.options.fontFamily`
-- **配色方案**：暗色默认 / 亮色 / 绿色 CRT（含 ANSI 16 色），`term.options.theme`
-- 持久化：`localStorage`（key `ws-terminal-settings`），全局共享，运行时更新不重建终端
+**界面外观**（整个 UI）：
+- **界面主题**：暗色 zinc / 亮色 / 绿色 CRT——通过 `<html>` 上的 class（`theme-*`）+ shadcn CSS 变量切换，菜单/面板/文字整体换肤
+- **界面缩放**：85%–130% 整体等比（CSS `zoom`，类似 DPI）
 
-相关文件：`src/lib/terminal-settings.ts`（类型/默认值/预置）、`src/components/SettingsPanel.tsx`（UI）。
+**终端显示**（独立于界面缩放）：
+- **终端字号**：10–20px，`term.options.fontSize`
+- **终端字体**：7 种预置等宽字体，`term.options.fontFamily`
+- **终端配色**：`auto`（跟随界面主题）或单独指定（暗色/亮色/绿色 CRT），`term.options.theme`
+
+持久化：`localStorage`（key `ws-appearance`，兼容迁移旧 `ws-terminal-settings`），全局共享，运行时更新不重建终端。
+
+相关文件：`src/lib/appearance.ts`（模型/主题/终端预置/持久化/DOM 应用）、`src/index.css`（主题 CSS 变量组）、`src/components/SettingsPanel.tsx`（UI）。
 
 ## 说明
 

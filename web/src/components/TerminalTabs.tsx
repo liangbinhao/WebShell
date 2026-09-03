@@ -32,8 +32,8 @@ interface TerminalTabsProps {
   className?: string;
   /** 命令历史记录（requirements.md §12） */
   onHistoryRecord?: (tab: TabItem, command: string) => void;
-  /** 终端显示设置（全局共享） */
-  settings: import('../lib/terminal-settings').TerminalSettings;
+  /** 全局外观设置（UI 主题/缩放/终端显示，见 lib/appearance.ts） */
+  appearance: import('../lib/appearance').AppearanceSettings;
 }
 
 const STATUS_META: Record<
@@ -52,7 +52,7 @@ const STATUS_META: Record<
  * - 切换 Tab 不卸载其他会话（display:none 隐藏，保持连接）
  */
 const TerminalTabs = forwardRef<TerminalTabsHandle, TerminalTabsProps>(
-  function TerminalTabs({ className, onHistoryRecord, settings }, ref) {
+  function TerminalTabs({ className, onHistoryRecord, appearance }, ref) {
     const [tabs, setTabs] = useState<TabItem[]>([]);
     const [activeId, setActiveId] = useState<string | null>(null);
     const activeTerminalRef = useRef<TerminalHandle | null>(null);
@@ -249,7 +249,7 @@ const TerminalTabs = forwardRef<TerminalTabsHandle, TerminalTabsProps>(
                     active={isActive}
                     onStatusChange={(s, err) => updateStatus(tab.id, s, err)}
                     onCommand={(cmd) => handleCommand(tab, cmd)}
-                    settings={settings}
+                    appearance={appearance}
                   />
                 </div>
               </div>
