@@ -93,9 +93,43 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
       (data: string) => {
         send({ type: 'input', data });
 
+        // 从 xterm buffer 读取当前行的完整文本（含远端 Tab 补全/readline 结果）。
+        // 仅当剥离提示符后能可靠得到命令时才使用，否则回退输入缓存。
+        const readScreenCommand = (): string | null => {
+          const term = termRef.current;
+          if (!term) return null;
+          try {
+            const buffer = term.buffer.active;
+            const line = buffer.getLine(buffer.cursorY);
+            if (!line) return null;
+            const raw = line.translateToString(false).trimEnd();
+            if (!raw) return null;
+            // 正向扫描找"提示符符号($#>) + 空格/行尾"的候选，取最后一个。
+            // 约束"符号后紧跟空格"天然排除命令内的 $VAR（$ 后是字母）与 $(（后是括号）；
+            // 取最后一个是因为命令内偶尔出现的 "$ x" 形态罕见，提示符几乎总是行内最后
+            // 一个 "$#" 后跟空格的符号。
+            let cut = -1;
+            for (let i = 0; i < raw.length; i++) {
+              const ch = raw[i];
+              if (
+                (ch === '$' || ch === '#' || ch === '>') &&
+                (i + 1 >= raw.length || raw[i + 1] === ' ' || raw[i + 1] === '\t')
+              ) {
+                cut = i;
+              }
+            }
+            if (cut < 0) return null;
+            const cmd = raw.slice(cut + 1).trim();
+            return cmd || null;
+          } catch {
+            return null;
+          }
+        };
+
         if (data === '\r') {
-          // Enter：当前输入行视为一条已执行命令
-          const cmd = inputBufferRef.current.trim();
+          // Enter：优先取屏幕上该行（含补全结果），其次输入缓存
+          const screenCmd = readScreenCommand();
+          const cmd = (screenCmd ?? inputBufferRef.current).trim();
           inputBufferRef.current = '';
           if (cmd) onCommandRef.current(cmd);
         } else if (data.includes('\r')) {
@@ -224,6 +258,56 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
       fitRef.current = fit;
 
       const dataDisposable = term.onData(handleData);
+
+      // ---- 复制 / 粘贴（Ctrl+Shift+C / Ctrl+Shift+V；选中文本时 Ctrl+C 复制）----
+      // 浏览器不允许 JS 读取剪贴板，所以粘贴需要用户按 Ctrl+Shift+V（xterm 会触发
+      // paste 事件）或由浏览器弹授权；这里拦截 Ctrl+Shift+C 复制、Ctrl+Shift+V 交给
+      // 浏览器默认粘贴、以及选中文本时 Ctrl+C 改为复制（不向远端发送中断）。
+      const copySelection = () => {
+        if (!term.hasSelection()) return false;
+        const sel = term.getSelection();
+        navigator.clipboard
+          .writeText(sel)
+          .catch(() => {
+            // 剪贴板不可用（非安全上下文等）时回退到 textarea 选中复制
+            const ta = term.textarea;
+            if (ta) {
+              ta.value = sel;
+              ta.select();
+              document.execCommand('copy');
+              ta.value = '';
+            }
+          });
+        return true;
+      };
+
+      const customKeyHandler = (ev: KeyboardEvent): boolean => {
+        const mod = ev.ctrlKey || ev.metaKey;
+        const shift = ev.shiftKey;
+        // Ctrl+Shift+C：复制（终端惯例）
+        if (mod && shift && !ev.altKey && (ev.key === 'C' || ev.key === 'c')) {
+          ev.preventDefault();
+          copySelection();
+          return false; // 不再传给 xterm
+        }
+        // Ctrl+Shift+V：粘贴——不拦截，交给浏览器触发 paste 事件
+        if (mod && shift && !ev.altKey && (ev.key === 'V' || ev.key === 'v')) {
+          // 由 xterm 默认处理（textarea focus + 浏览器粘贴）
+          return true;
+        }
+        // 选中文本时 Ctrl+C：复制而不是中断
+        if (mod && !shift && (ev.key === 'C' || ev.key === 'c') && term.hasSelection()) {
+          ev.preventDefault();
+          copySelection();
+          return false;
+        }
+        // 其余键（含无选中的 Ctrl+C 中断）正常传给远端
+        return true;
+      };
+      term.attachCustomKeyEventHandler(customKeyHandler);
+      // 粘贴支持：xterm 的 textarea 需要 focus 才能接收浏览器 paste 事件，
+      // 终端自带 textarea 由 xterm 管理，open 后即就绪，无需额外处理。
+
       const observer = new ResizeObserver(() => fitTerminal());
       observer.observe(el);
 

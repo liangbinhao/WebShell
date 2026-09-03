@@ -87,7 +87,10 @@ class SSHSession:
             bridge = _SessionBridge(self)
             channel, _session_obj = await conn.create_session(
                 lambda: _TerminalClientSession(bridge),
-                term_type="xterm",
+                # xterm-256color：更通用的终端标识，改善远端 256 色工具（vim/ls 等）
+                # 的颜色显示；bash readline 对方向键历史的支持由远端 shell 决定，
+                # 与本字段无关（见 requirements.md 已知限制）。
+                term_type="xterm-256color",
                 term_size=(int(cols), int(rows)),
                 encoding="utf-8",
             )

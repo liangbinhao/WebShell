@@ -282,6 +282,12 @@ tmux
 
 第一阶段不要求完美兼容所有终端程序，但架构必须基于 PTY / interactive shell，而不是简单的 command execution。
 
+终端环境与已知限制（真实使用反馈）：
+
+* **TERM**：后端以 `xterm-256color` 建立 PTY（改善 256 色工具显示）。
+* **进入容器/pod 后方向键历史不可用**：这是容器内 shell 的限制（多数镜像默认 `sh`/busybox，不支持 readline 历史；`bash` 才支持）。与 Web SSH 无关——普通 SSH 连接中方向键历史正常。在容器内执行 `bash` 或用 `kubectl exec -it <pod> -- bash` 即可使用方向键历史。
+* **Tab 补全后的命令历史**：历史记录优先读取终端屏幕当前行的完整内容（含远端补全结果）；当无法可靠识别（如无典型提示符、命令包含 `$` 等）时回退为记录用户实际输入。启发式方案，不保证与远端 shell 完全一致。
+
 ---
 
 # 8. Terminal 多会话

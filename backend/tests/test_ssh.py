@@ -62,7 +62,7 @@ async def test_normal_login_and_pty(settings):
     assert ok is True
     conn = connector.connections[0]
     # PTY / 交互式 shell：term_type + term_size 正确传递
-    assert conn.create_kwargs["term_type"] == "xterm"
+    assert conn.create_kwargs["term_type"] == "xterm-256color"
     assert conn.create_kwargs["term_size"] == (120, 30)
     assert conn.create_kwargs["encoding"] == "utf-8"
     events = await read_events(session, 2)

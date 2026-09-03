@@ -71,7 +71,7 @@ def test_ws_connect_status_and_pty(client, connector):
         assert ws.receive_json() == {"type": "status", "state": "connecting"}
         assert ws.receive_json() == {"type": "status", "state": "connected"}
         conn = connector.connections[-1]
-        assert conn.create_kwargs["term_type"] == "xterm"
+        assert conn.create_kwargs["term_type"] == "xterm-256color"
         assert conn.create_kwargs["term_size"] == (120, 30)
     # 断开后会话与资源释放
     assert client.app.state.manager.active_count == 0
