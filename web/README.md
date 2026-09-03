@@ -79,7 +79,7 @@ web/src
 
 **终端显示**（独立于界面缩放）：
 - **终端字号**：10–20px，`term.options.fontSize`
-- **终端字体**：7 种预置等宽字体，`term.options.fontFamily`
+- **终端字体**：等宽字体列表——**JetBrains Mono / Fira Code 内置打包**（@fontsource，无需安装、离线可用）；其余使用系统字体，通过 `document.fonts.check` **动态检测**，未安装的置灰提示，`term.options.fontFamily`
 - **终端配色**：`auto`（跟随界面主题）或单独指定（暗色/亮色/绿色 CRT），`term.options.theme`
 
 持久化：`localStorage`（key `ws-appearance`，兼容迁移旧 `ws-terminal-settings`），全局共享，运行时更新不重建终端。

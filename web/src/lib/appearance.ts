@@ -109,15 +109,89 @@ export const FONT_SIZE_MIN = 10;
 export const FONT_SIZE_MAX = 20;
 export const FONT_SIZE_STEP = 1;
 
-export const FONT_OPTIONS: { label: string; value: string }[] = [
-  { label: '系统默认 (Menlo/Monaco/Consolas)', value: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' },
-  { label: 'JetBrains Mono', value: '"JetBrains Mono", Menlo, monospace' },
-  { label: 'Fira Code', value: '"Fira Code", Menlo, monospace' },
-  { label: 'Cascadia Code', value: '"Cascadia Code", Consolas, monospace' },
-  { label: 'Source Code Pro', value: '"Source Code Pro", Menlo, monospace' },
-  { label: 'Consolas', value: 'Consolas, Menlo, monospace' },
-  { label: 'Courier New', value: '"Courier New", monospace' },
+/**
+ * 终端字体选项。
+ * - kind: 'builtin' → 已随前端打包（@fontsource），任何系统直接可用；
+ * - kind: 'system'  → 使用系统自带字体；是否可用由 detectSystemFonts 检测。
+ * - check: 检测用字体名（document.fonts.check 的 family 片段）
+ */
+export interface FontOption {
+  label: string;
+  value: string;
+  kind: 'builtin' | 'system';
+  /** 需系统安装的字体主名（用于检测）；builtin 无需检测 */
+  check?: string;
+}
+
+export const FONT_OPTIONS: FontOption[] = [
+  {
+    label: '系统默认 (Menlo/Monaco/Consolas)',
+    value: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+    kind: 'system',
+  },
+  {
+    label: 'JetBrains Mono（内置）',
+    value: '"JetBrains Mono", Menlo, monospace',
+    kind: 'builtin',
+  },
+  {
+    label: 'Fira Code（内置）',
+    value: '"Fira Code", Menlo, monospace',
+    kind: 'builtin',
+  },
+  {
+    label: 'Cascadia Code',
+    value: '"Cascadia Code", Consolas, monospace',
+    kind: 'system',
+    check: 'Cascadia Code',
+  },
+  {
+    label: 'Source Code Pro',
+    value: '"Source Code Pro", Menlo, monospace',
+    kind: 'system',
+    check: 'Source Code Pro',
+  },
+  {
+    label: 'Consolas',
+    value: 'Consolas, Menlo, monospace',
+    kind: 'system',
+    check: 'Consolas',
+  },
+  {
+    label: 'Courier New',
+    value: '"Courier New", monospace',
+    kind: 'system',
+    check: 'Courier New',
+  },
 ];
+
+/**
+ * 检测系统中已安装哪些字体（用 document.fonts.check）。
+ * 浏览器字体检测需要字体已加载；对未内置的系统字体，check 结果即"是否安装"。
+ */
+export function detectSystemFonts(): Set<string> {
+  const installed = new Set<string>();
+  try {
+    const f = document.fonts;
+    for (const opt of FONT_OPTIONS) {
+      if (opt.kind === 'builtin') continue;
+      if (opt.check && f.check(`16px "${opt.check}"`)) {
+        installed.add(opt.check);
+      }
+    }
+  } catch {
+    // 环境不支持 fonts.check（极少数）→ 全部视为可用
+    for (const opt of FONT_OPTIONS) if (opt.check) installed.add(opt.check);
+  }
+  return installed;
+}
+
+/** 字体是否可用（builtin 恒可用；system 需检测到或未知时默认可用） */
+export function isFontAvailable(opt: FontOption, installed: Set<string>): boolean {
+  if (opt.kind === 'builtin') return true;
+  if (!opt.check) return true; // 系统默认（多字体栈）恒可用
+  return installed.has(opt.check);
+}
 
 /* ---------------------------------------------------------------- 外观设置 */
 

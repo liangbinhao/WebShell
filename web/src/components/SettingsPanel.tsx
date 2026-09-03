@@ -1,9 +1,12 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import {
+  detectSystemFonts,
   FONT_OPTIONS,
   FONT_SIZE_MAX,
   FONT_SIZE_MIN,
   FONT_SIZE_STEP,
+  isFontAvailable,
   TERMINAL_THEMES,
   UI_THEMES,
   UI_ZOOM_MAX,
@@ -22,6 +25,19 @@ interface SettingsPanelProps {
 
 /** 右栏「设置」Tab：界面外观（主题/缩放）+ 终端显示（字号/字体/配色） */
 export function SettingsPanel({ appearance, onChange }: SettingsPanelProps) {
+  // 系统字体检测（mount 时一次；字体延迟加载时用 fonts.ready 兜底）
+  const [installedFonts, setInstalledFonts] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    setInstalledFonts(detectSystemFonts());
+    // 字体加载完成后复查（内置字体异步就绪可能影响后续 check）
+    document.fonts?.ready?.then(() => setInstalledFonts(detectSystemFonts())).catch(() => {});
+  }, []);
+
+  const fontAvailability = useMemo(
+    () => new Map(FONT_OPTIONS.map((f) => [f.value, isFontAvailable(f, installedFonts)])),
+    [installedFonts],
+  );
+
   const patchUi = (patch: Partial<AppearanceSettings>) =>
     onChange({ ...appearance, ...patch });
   const patchTerminal = (patch: Partial<AppearanceSettings['terminal']>) =>
@@ -211,12 +227,24 @@ export function SettingsPanel({ appearance, onChange }: SettingsPanelProps) {
             className="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-foreground/50"
             aria-label="终端字体"
           >
-            {FONT_OPTIONS.map((f) => (
-              <option key={f.value} value={f.value}>
-                {f.label}
-              </option>
-            ))}
+            {FONT_OPTIONS.map((f) => {
+              const available = fontAvailability.get(f.value) ?? true;
+              return (
+                <option
+                  key={f.value}
+                  value={f.value}
+                  disabled={!available}
+                  className={available ? '' : 'text-muted-foreground'}
+                >
+                  {f.label}
+                  {!available ? '（未安装）' : ''}
+                </option>
+              );
+            })}
           </select>
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            带「内置」的字体已随应用打包、直接可用；其余使用系统已安装的字体（未安装的已置灰）。
+          </p>
         </div>
 
         {/* 终端配色（auto = 跟随界面主题） */}
