@@ -162,7 +162,20 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
       if (disposedRef.current) return;
       intentionalCloseRef.current = false;
       const term = termRef.current;
-      const ws = new WebSocket(buildTerminalWsUrl(serverId));
+      // 连接前先 fit 拿到实际尺寸，通过 URL 传给后端 → start() 一开始就用
+      // 正确尺寸创建 PTY（cmd/ConPTY 启动时即知道屏幕大小，避免 ↑ 历史跳行）
+      let cols = 120;
+      let rows = 30;
+      try {
+        fitRef.current?.fit();
+        if (term && term.cols > 0 && term.rows > 0) {
+          cols = term.cols;
+          rows = term.rows;
+        }
+      } catch {
+        // 容器不可见时 fit 失败，用默认值
+      }
+      const ws = new WebSocket(buildTerminalWsUrl(serverId, cols, rows));
       wsRef.current = ws;
       setStatus('connecting');
 

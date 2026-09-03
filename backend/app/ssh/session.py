@@ -61,6 +61,10 @@ class SSHSession:
         self._channel: Optional[object] = None
         self._closed = False
         self._cleanup_task: Optional[asyncio.Task] = None
+        # 会话建立前收到的 resize 暂存，channel 就绪后补发
+        # （前端 ws.onopen 即发 resize，此时会话尚在 connecting，直接丢会导致
+        #  远端 ConPTY/cmd 保持默认尺寸，与 xterm 实际尺寸不一致 → ↑ 历史跳行）
+        self._pending_resize: Optional[tuple[int, int]] = None
 
     # ------------------------------------------------------------- 事件流
 
@@ -125,6 +129,14 @@ class SSHSession:
                 encoding="utf-8",
             )
             self._channel = channel
+            # 建立 channel 后补发会话建立前暂存的 resize（前端 onopen 早于 connected）
+            if self._pending_resize is not None:
+                cols_p, rows_p = self._pending_resize
+                self._pending_resize = None
+                try:
+                    channel.change_terminal_size(int(cols_p), int(rows_p))
+                except Exception as exc:
+                    logger.warning("session %s pending resize failed: %s", self.id, exc)
             logger.info("SSH session created id=%s server=%s", self.id, self.server.get("name"))
             self.emit({"type": "status", "state": "connected"})
             return True
@@ -156,7 +168,12 @@ class SSHSession:
             logger.warning("session %s input write failed: %s", self.id, exc)
 
     def resize(self, cols: int, rows: int) -> None:
-        if self._closed or self._channel is None:
+        # 会话/通道未就绪时暂存，start() 建立 channel 后补发（避免初始 resize 丢失）
+        if self._channel is None:
+            self._pending_resize = (int(cols), int(rows))
+            return
+        self._pending_resize = None
+        if self._closed:
             return
         try:
             self._channel.change_terminal_size(int(cols), int(rows))
