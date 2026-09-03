@@ -23,9 +23,9 @@ class Settings:
     ssh_keepalive_count_max: int = 3
     # WebSocket 层 ping 间隔（秒）
     ws_ping_interval: float = 30.0
-    # 历史记录上限
-    history_max: int = 2000
-    history_list_limit: int = 500
+    # 历史记录：轻量保留（去重 + 小上限，见 HistoryRepo）
+    history_max: int = 200
+    history_list_limit: int = 100
     # CORS：仅放行本机开发来源
     cors_allow_origin_regex: str = r"https?://(localhost|127\.0\.0\.1)(:\d+)?"
 

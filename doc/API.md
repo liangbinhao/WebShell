@@ -118,8 +118,8 @@ curl -X POST http://127.0.0.1:8000/api/servers \
 
 | 方法 | 路径 | 说明 | 成功响应 |
 |---|---|---|---|
-| GET | `/api/history` | 列表（`?q=` 搜索命令、`?server_id=` 过滤、`?limit=` 限制条数；最新在前，默认上限 500） | `200` `HistoryOut[]` |
-| POST | `/api/history` | 记录一条（前端在用户执行命令时调用；自动裁剪至 2000 条） | `201` `HistoryOut` |
+| GET | `/api/history` | 列表（`?q=` 搜索命令、`?server_id=` 过滤、`?limit=` 限制条数；最新在前，默认上限 100） | `200` `HistoryOut[]` |
+| POST | `/api/history` | 记录一条（前端在用户执行命令时调用；**同服务器同命令去重**，保留最近 200 条） | `201` `HistoryOut` |
 | DELETE | `/api/history/{id}` | 删除一条 | `204` 无内容 |
 
 示例（记录历史）：
@@ -196,4 +196,4 @@ WebSocket 连接失败时，服务端先发 `{"type":"error","message":"Failed t
 | `WS_KNOWN_HOSTS` | `~/.ssh/known_hosts` | Host key 校验文件 |
 | `WS_SSH_CONFIG` | `~/.ssh/config` | 导入来源 |
 
-其他可调参数（连接超时 15s、keepalive 30s×3、WS ping 30s、历史上限 2000/500）见 `backend/app/config/settings.py`。
+其他可调参数（连接超时 15s、keepalive 30s×3、WS ping 30s、历史上限 200/100）见 `backend/app/config/settings.py`。

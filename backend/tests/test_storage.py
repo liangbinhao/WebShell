@@ -160,6 +160,25 @@ def test_history_trim(tmp_path):
     assert items[-1]["command"] == "cmd-2"
 
 
+def test_history_dedup(tmp_path):
+    """同服务器同命令只保留最近一次（轻量保留，见需求 §12）。"""
+    settings = Settings(data_dir=tmp_path / "d", known_hosts=tmp_path / "k",
+                        ssh_config_path=tmp_path / "c")
+    store = JsonStore(tmp_path / "d" / "history.json", [])
+    repo = HistoryRepo(store, max_entries=settings.history_max)
+    repo.add("s1", "S", "u", "docker ps")
+    repo.add("s1", "S", "u", "ls -la")
+    repo.add("s1", "S", "u", "docker ps")  # 重复执行
+    items = repo.list()
+    # 去重后只剩 2 条，且 docker ps 是最近一次
+    assert len(items) == 2
+    assert items[0]["command"] == "docker ps"
+    assert items[1]["command"] == "ls -la"
+    # 不同服务器同命令不互相去重
+    repo.add("s2", "S2", "u", "docker ps")
+    assert len(repo.list()) == 3
+
+
 def test_history_delete(tmp_path):
     storage = make_storage(tmp_path)
     rec = storage.history.add("s1", "S", "u", "pwd")

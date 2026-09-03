@@ -265,9 +265,9 @@ class CommandRepo(Collection):
 
 
 class HistoryRepo(Collection):
-    """命令历史仓库：按 executed_at 倒序，超出上限自动裁剪。"""
+    """命令历史仓库：按 executed_at 倒序，去重 + 小上限（轻量保留，见需求 §12）。"""
 
-    def __init__(self, store: JsonStore, max_entries: int = 2000):
+    def __init__(self, store: JsonStore, max_entries: int = 200):
         super().__init__(store)
         self._max_entries = max_entries
 
@@ -294,6 +294,9 @@ class HistoryRepo(Collection):
             "executed_at": now_ms(),
         }
         items = self.all()
+        # 去重：同服务器同命令只保留最近一次执行，避免高频命令刷屏
+        items = [x for x in items
+                 if not (x.get("server_id") == server_id and x.get("command") == command)]
         items.append(record)
         # 裁剪超出上限的旧记录（保留最近 max_entries 条）
         if len(items) > self._max_entries:

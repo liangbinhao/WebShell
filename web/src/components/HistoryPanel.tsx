@@ -118,7 +118,9 @@ export function HistoryPanel({ onInsert, showToast }: HistoryPanelProps) {
           <div className="flex flex-col items-center gap-2 px-3 py-10 text-center text-muted-foreground">
             <SquareTerminal className="h-8 w-8 opacity-30" />
             <p className="text-sm">{q ? '没有匹配的历史记录' : '还没有历史命令'}</p>
-            <p className="text-xs">在终端中执行命令后会自动记录</p>
+            <p className="text-xs">
+              在终端中执行命令后自动记录（同命令去重，保留最近 200 条）
+            </p>
           </div>
         ) : (
           <div className="space-y-1">
