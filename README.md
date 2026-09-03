@@ -24,12 +24,13 @@
 
 ```text
 WebShell/
-├── AGENTS.md            # Agent 开发规范（项目根目录，agent 自动读取）
+├── AGENTS.md            # Agent 骨架规范（细则按需加载 docs/agent/）
 ├── README.md
 ├── CHANGELOG.md         # 版本变更记录
 ├── SECURITY.md          # 安全模型与注意事项
 ├── LICENSE              # Apache-2.0
-├── doc/                 # 文档
+├── docs/agent/          # Agent 细则（git 提交 / 测试策略 / 开发流程）
+├── doc/                 # 项目文档
 │   ├── requirements.md  # 需求规格说明书
 │   ├── CONTRACT.md      # 前后端接口契约（REST + WebSocket 消息格式 + 环境脚本约定）
 │   └── API.md           # 面向使用者的接口参考（REST + WebSocket）
@@ -39,7 +40,7 @@ WebShell/
 │   ├── stop.sh          # 停止服务
 │   └── clean.sh         # 清理生成物
 ├── backend/             # FastAPI 后端（app/ + tests/ + scripts/）
-└── web/                 # React 前端
+└── web/                 # React 前端（src/ + e2e/ 核心旅程 E2E）
 ```
 
 ## 快速开始
@@ -75,9 +76,13 @@ cd WebShell
 ## 测试
 
 ```bash
-cd backend && uv run pytest        # 93 个用例（单元 + SSH mock + WebSocket）
-cd backend && PYTHONPATH=. uv run python scripts/e2e_ssh_ws.py   # 真实 SSH 端到端（跨平台）
+cd backend && uv run pytest        # 后端单元 + API/集成（94 个用例）
+cd backend && PYTHONPATH=. uv run python scripts/e2e_ssh_ws.py   # 后端真实 SSH 端到端（跨平台）
+./script/run.sh                    # E2E 前置：启动前后端
+cd web && npx playwright test      # 前端核心旅程 E2E（真实浏览器 + 真实后端）
 ```
+
+测试分层与策略见 `docs/agent/testing-policy.md`。
 
 ## 文档索引
 

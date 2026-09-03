@@ -25,7 +25,7 @@ uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 ```bash
 cd backend
-uv run pytest            # 93 个用例（单元 + SSH mock + WebSocket）
+uv run pytest            # 94 个用例（单元 + API/集成 + WebSocket）
 uv run python scripts/e2e_ssh_ws.py   # 真实 SSH 端到端（asyncssh 服务器 → REST → WebSocket）
 uv run python scripts/smoke_ssh_local.py  # 本地 SSH 集成冒烟（开发期）
 ```
