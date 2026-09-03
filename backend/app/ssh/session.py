@@ -74,6 +74,33 @@ class SSHSession:
 
     # ------------------------------------------------------------- 生命周期
 
+    # OpenSSH 客户端请求 PTY 时发送的标准终端模式（RFC 4254 §8 opcode）。
+    # asyncssh 默认不发送 term_modes——Windows sshd 收到空模式时不会正确初始化
+    # 远端控制台（影响 PSReadLine 的方向键历史等），补上与 OpenSSH 一致的模式
+    # 可让远端 shell 行为与原生 ssh 一致。
+    _DEFAULT_TERM_MODES = {
+        1: 3,    # VINTR   (Ctrl+C)
+        2: 28,   # VQUIT   (Ctrl+\)
+        3: 127,  # VERASE  (Backspace)
+        4: 21,   # VKILL
+        5: 4,    # VEOF    (Ctrl+D)
+        8: 17,   # VSTART
+        9: 19,   # VSTOP
+        10: 26,  # VSUSP
+        13: 23,  # WERASE
+        36: 1,   # ICRNL
+        50: 1,   # ISIG
+        51: 1,   # ICANON
+        53: 1,   # ECHO
+        54: 1,   # ECHOE
+        55: 1,   # ECHOK
+        59: 1,   # IEXTEN
+        70: 1,   # OPOST
+        72: 1,   # ONLCR
+        91: 1,   # CS8
+        92: 0,   # PARENB off
+    }
+
     async def start(self, cols: int = 120, rows: int = 30) -> bool:
         """建立 SSH 连接并创建 PTY shell。成功返回 True，失败返回 False。
 
@@ -88,10 +115,13 @@ class SSHSession:
             channel, _session_obj = await conn.create_session(
                 lambda: _TerminalClientSession(bridge),
                 # xterm-256color：更通用的终端标识，改善远端 256 色工具（vim/ls 等）
-                # 的颜色显示；bash readline 对方向键历史的支持由远端 shell 决定，
-                # 与本字段无关（见 requirements.md 已知限制）。
+                # 的颜色显示。
                 term_type="xterm-256color",
                 term_size=(int(cols), int(rows)),
+                # 显式发送标准终端模式（与 OpenSSH 客户端一致），
+                # 避免 Windows 远端因空 term_modes 导致终端模式未初始化
+                # （PSReadLine 方向键历史异常即源于此）。
+                term_modes=self._DEFAULT_TERM_MODES,
                 encoding="utf-8",
             )
             self._channel = channel

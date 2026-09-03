@@ -61,10 +61,17 @@ async def test_normal_login_and_pty(settings):
     ok = await session.start(cols=120, rows=30)
     assert ok is True
     conn = connector.connections[0]
-    # PTY / 交互式 shell：term_type + term_size 正确传递
+    # PTY / 交互式 shell：term_type + term_size + term_modes 正确传递
     assert conn.create_kwargs["term_type"] == "xterm-256color"
     assert conn.create_kwargs["term_size"] == (120, 30)
     assert conn.create_kwargs["encoding"] == "utf-8"
+    # term_modes 非空（与 OpenSSH 一致的标准模式，修复 Windows PSReadLine 方向键历史）
+    modes = conn.create_kwargs.get("term_modes")
+    assert modes, "term_modes 不应为空"
+    assert modes.get(53) == 1   # ECHO on
+    assert modes.get(51) == 1   # ICANON on
+    assert modes.get(36) == 1   # ICRNL on
+    assert modes.get(72) == 1   # ONLCR on
     events = await read_events(session, 2)
     assert events == [{"type": "status", "state": "connecting"},
                       {"type": "status", "state": "connected"}]
