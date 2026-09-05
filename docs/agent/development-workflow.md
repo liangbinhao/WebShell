@@ -4,11 +4,11 @@
 
 ## 功能开发顺序
 
-1. 定位需求文档对应章节（`doc/requirements.md`：功能需求 → 验收标准）；
-2. 明确接口契约：REST 路径、WebSocket 消息格式、数据模型（以 `doc/CONTRACT.md` 为准）；
+1. 定位需求文档对应章节（`docs/project/requirements.md`：功能需求 → 验收标准）；
+2. 明确接口契约：REST 路径、WebSocket 消息格式、数据模型（以 `docs/project/CONTRACT.md` 为准）；
 3. 后端先行实现（API / WebSocket / SSH 会话），再实现前端对接；
 4. 实现后补充或更新测试（见 `testing-policy.md`）；
-5. 更新受影响的文档（`doc/requirements.md`、`doc/API.md`、README 等）。
+5. 更新受影响的文档（`docs/project/requirements.md`、`docs/project/API.md`、README 等）。
 
 ## 变更类型与文档联动
 
@@ -16,8 +16,8 @@
 
 | 改动范围 | 必须同步的文档 |
 |---|---|
-| REST / WebSocket 契约 | `doc/CONTRACT.md`、`doc/API.md` |
-| 功能/UI/外观/设置 | `doc/requirements.md` 对应章节、`web/README.md`（如涉及前端） |
+| REST / WebSocket 契约 | `docs/project/CONTRACT.md`、`docs/project/API.md` |
+| 功能/UI/外观/设置 | `docs/project/requirements.md` 对应章节、`web/README.md`（如涉及前端） |
 | 后端模块/测试/运行 | `backend/README.md` |
 | 项目总览 | 根 `README.md`（功能特性、目录结构） |
 | 版本记录 | `CHANGELOG.md` |

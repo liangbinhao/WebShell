@@ -6,7 +6,7 @@
 
 ### 0. 项目概览
 
-**Web SSH Workspace**（个人 Web SSH 运维工作台）。需求以 `doc/requirements.md` 为准；前后端接口契约以 `doc/CONTRACT.md` 为准。
+**Web SSH Workspace**（个人 Web SSH 运维工作台）。需求以 `docs/project/requirements.md` 为准；前后端接口契约以 `docs/project/CONTRACT.md` 为准。
 
 技术栈：
 
@@ -14,13 +14,13 @@
 * 后端：Python 3.11 + FastAPI + WebSocket + AsyncSSH（uv 管理环境）
 * 前后端分离：后端仅提供 REST API 与 WebSocket，不渲染页面
 
-目录与结构详见 `doc/requirements.md`。
+目录与结构详见 `docs/project/requirements.md`。
 
 开发约束：
 
 * 终端交互必须基于 **PTY / interactive shell**，禁止退化为 `ssh exec command` 一次性执行；
 * 服务器配置、命令库、历史记录三块数据彼此解耦；
-* 新代码遵循 `doc/requirements.md` 的模块划分，不得为局部方便破坏结构约定。
+* 新代码遵循 `docs/project/requirements.md` 的模块划分，不得为局部方便破坏结构约定。
 
 ### 1. General Rules
 

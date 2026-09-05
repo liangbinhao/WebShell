@@ -29,11 +29,13 @@ WebShell/
 ├── CHANGELOG.md         # 版本变更记录
 ├── SECURITY.md          # 安全模型与注意事项
 ├── LICENSE              # Apache-2.0
-├── docs/agent/          # Agent 细则（git 提交 / 测试策略 / 开发流程）
-├── doc/                 # 项目文档
-│   ├── requirements.md  # 需求规格说明书
-│   ├── CONTRACT.md      # 前后端接口契约（REST + WebSocket 消息格式 + 环境脚本约定）
-│   └── API.md           # 面向使用者的接口参考（REST + WebSocket）
+├── docs/                 # 全部文档
+│   ├── agent/            # Agent 细则（git 提交 / 测试策略 / 开发流程）
+│   ├── project/          # 项目文档
+│   │   ├── requirements.md  # 需求规格说明书
+│   │   ├── CONTRACT.md      # 前后端接口契约（REST + WebSocket 消息格式 + 环境脚本约定）
+│   │   └── API.md           # 面向使用者的接口参考（REST + WebSocket）
+│   └── novice/           # 新手指南（本机，不入 git）
 ├── script/              # 项目脚本
 │   ├── build.sh         # 安装依赖并构建
 │   ├── run.sh           # 启动后端 + 前端
@@ -86,9 +88,9 @@ cd web && npx playwright test      # 前端核心旅程 E2E（真实浏览器 + 
 
 ## 文档索引
 
-- 需求与验收标准：[doc/requirements.md](doc/requirements.md)
-- 前后端接口契约（含环境与脚本约定）：[doc/CONTRACT.md](doc/CONTRACT.md)
-- **API 接口参考（REST + WebSocket）**：[doc/API.md](doc/API.md)
+- 需求与验收标准：[docs/project/requirements.md](docs/project/requirements.md)
+- 前后端接口契约（含环境与脚本约定）：[docs/project/CONTRACT.md](docs/project/CONTRACT.md)
+- **API 接口参考（REST + WebSocket）**：[docs/project/API.md](docs/project/API.md)
 - Agent 开发规范：[AGENTS.md](AGENTS.md)
 - 后端说明：[backend/README.md](backend/README.md)
 - 前端说明：[web/README.md](web/README.md)

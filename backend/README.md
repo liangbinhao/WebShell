@@ -54,9 +54,9 @@ backend/
 ## 数据与配置
 
 - 数据目录：`backend/data/`（servers.json / commands.json / history.json + secret.key），**已被 .gitignore 排除，勿提交**
-- 环境变量：`WS_DATA_DIR`、`WS_KNOWN_HOSTS`、`WS_SSH_CONFIG`（详见 [doc/API.md §6](../doc/API.md)）
+- 环境变量：`WS_DATA_DIR`、`WS_KNOWN_HOSTS`、`WS_SSH_CONFIG`（详见 [doc/API.md §6](../docs/project/API.md)）
 - 其他参数（超时、keepalive、历史上限、CORS）见 `app/config/settings.py`
 
 ## API
 
-完整接口参考见 [doc/API.md](../doc/API.md)（REST + WebSocket 消息格式、错误码、示例）。
+完整接口参考见 [doc/API.md](../docs/project/API.md)（REST + WebSocket 消息格式、错误码、示例）。
