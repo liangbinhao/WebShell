@@ -36,3 +36,6 @@ web/.npm-cache/
 .pw-browsers/
 test-results/
 playwright-report/
+
+# 新手协作指南（本地文档，不入库）
+docs/novice/
