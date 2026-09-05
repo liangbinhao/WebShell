@@ -13,6 +13,8 @@ interface RightPanelProps {
   /** 终端显示设置（设置 Tab 编辑，全局生效） */
   appearance: AppearanceSettings;
   onAppearanceChange: (next: AppearanceSettings) => void;
+  /** 历史版本号：命令执行后自增，历史面板据此自动刷新 */
+  historyVersion: number;
 }
 
 /** 右栏：命令库 + 历史 + 设置（三个 Tab） */
@@ -22,6 +24,7 @@ export function RightPanel({
   showToast,
   appearance,
   onAppearanceChange,
+  historyVersion,
 }: RightPanelProps) {
   return (
     <div className="flex h-full w-80 shrink-0 flex-col border-l bg-card">
@@ -59,7 +62,11 @@ export function RightPanel({
             <CommandsPanel onInsert={onInsert} showToast={showToast} />
           </TabsContent>
           <TabsContent value="history" className="mt-0 h-full overflow-hidden p-0">
-            <HistoryPanel onInsert={onInsert} showToast={showToast} />
+            <HistoryPanel
+              onInsert={onInsert}
+              showToast={showToast}
+              version={historyVersion}
+            />
           </TabsContent>
           <TabsContent value="settings" className="mt-0 h-full overflow-hidden p-0">
             <SettingsPanel appearance={appearance} onChange={onAppearanceChange} />

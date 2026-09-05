@@ -95,10 +95,8 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
     // 处理用户输入：转发 + 历史识别
     const handleData = useCallback(
       (data: string) => {
-        send({ type: 'input', data });
-
-        // 从 xterm buffer 读取当前行的完整文本（含远端 Tab 补全/readline 结果）。
-        // 仅当剥离提示符后能可靠得到命令时才使用，否则回退输入缓存。
+        // 从 xterm buffer 读取当前行的完整文本（含远端 Tab 补全/方向键调出的历史）。
+        // 必须在 Enter 发送前读取——发送后远端回显换行，buffer 光标行已不在命令行上。
         const readScreenCommand = (): string | null => {
           const term = termRef.current;
           if (!term) return null;
@@ -131,28 +129,45 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
         };
 
         if (data === '\r') {
-          // Enter：优先取屏幕上该行（含补全结果），其次输入缓存
+          // Enter：先读屏幕行（Enter 前的完整命令行，含补全/方向键调出的历史），
+          // 再发送 Enter（发送后远端回显换行，行内容即失效）。
           const screenCmd = readScreenCommand();
-          const cmd = (screenCmd ?? inputBufferRef.current).trim();
+          const typed = inputBufferRef.current.trim();
           inputBufferRef.current = '';
+          // 屏幕行命令必须"以用户输入为前缀"才可信（说明是同一命令行被补全/历史扩展），
+          // 否则可能是误读了其他行（如输出流滚动），回退用户实际输入。
+          let cmd: string;
+          if (screenCmd && typed && screenCmd.startsWith(typed)) {
+            cmd = screenCmd;
+          } else if (screenCmd && !typed) {
+            // 用户没输入但屏幕有命令（↑ 调出历史后直接回车）：屏幕行可信
+            cmd = screenCmd;
+          } else {
+            cmd = typed || screenCmd || '';
+          }
+          send({ type: 'input', data });
           if (cmd) onCommandRef.current(cmd);
         } else if (data.includes('\r')) {
-          // 粘贴的多行文本
+          // 粘贴的多行文本（先发再处理缓存，多行中每个 Enter 都应执行）
+          send({ type: 'input', data });
           const parts = data.split('\r');
           const first = (inputBufferRef.current + parts[0]).trim();
           inputBufferRef.current = '';
           if (first) onCommandRef.current(first);
           const last = parts[parts.length - 1].replace(/[\x00-\x1f\x7f]/g, '');
           if (last) inputBufferRef.current += last;
-        } else if (data === '\x7f') {
-          inputBufferRef.current = inputBufferRef.current.slice(0, -1);
-        } else if (data === '\x03' || data === '\x04' || data === '\x0c') {
-          // Ctrl+C / Ctrl+D / Ctrl+L：中止当前输入
-          inputBufferRef.current = '';
-        } else if (!data.startsWith('\x1b') && data !== '\r') {
-          // 可打印字符；转义序列（方向键等）不进入历史缓存
-          const printable = data.replace(/[\x00-\x1f\x7f]/g, '');
-          if (printable) inputBufferRef.current += printable;
+        } else {
+          send({ type: 'input', data });
+          if (data === '\x7f') {
+            inputBufferRef.current = inputBufferRef.current.slice(0, -1);
+          } else if (data === '\x03' || data === '\x04' || data === '\x0c') {
+            // Ctrl+C / Ctrl+D / Ctrl+L：中止当前输入
+            inputBufferRef.current = '';
+          } else if (!data.startsWith('\x1b') && data !== '\r') {
+            // 可打印字符；转义序列（方向键等）不进入历史缓存
+            const printable = data.replace(/[\x00-\x1f\x7f]/g, '');
+            if (printable) inputBufferRef.current += printable;
+          }
         }
       },
       [send],

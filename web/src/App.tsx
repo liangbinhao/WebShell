@@ -28,6 +28,8 @@ export default function App() {
   const toastTimerRef = useRef<number | undefined>(undefined);
   /** 全局外观设置（UI 主题/缩放/终端显示，localStorage 持久化） */
   const [appearance, setAppearance] = useState<AppearanceSettings>(loadAppearance);
+  /** 历史版本号：命令执行后自增，HistoryPanel 据此自动刷新 */
+  const [historyVersion, setHistoryVersion] = useState(0);
 
   // 外观变化 → 应用到 DOM（html class 主题 + zoom 缩放）
   useEffect(() => {
@@ -62,13 +64,19 @@ export default function App() {
         username: tab.server.username,
         command,
       })
+      .then(() => {
+        // 记录成功 → 通知历史面板刷新（同命令去重后时间应更新）
+        setHistoryVersion((v) => v + 1);
+      })
       .catch(() => {
         // 后端不可用时静默失败，不影响终端体验
       });
   }, []);
 
   return (
-    <div className="flex h-screen min-w-0 flex-col overflow-hidden bg-background text-foreground">
+    // h-full 跟随 #root 的 100% 链（html/body/#root 均已设 height:100%）：
+    // 相比 100vh，100% 是浏览器实际可视区高度，不会被 Windows 任务栏遮挡底部。
+    <div className="flex h-full min-w-0 flex-col overflow-hidden bg-background text-foreground">
       {/* 顶栏 */}
       <header className="flex h-11 shrink-0 items-center gap-2 border-b bg-card px-4">
         <TerminalSquare className="h-5 w-5 text-emerald-500" />
@@ -138,6 +146,7 @@ export default function App() {
             showToast={showToast}
             appearance={appearance}
             onAppearanceChange={handleAppearanceChange}
+            historyVersion={historyVersion}
           />
         ) : (
           <button

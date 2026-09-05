@@ -18,10 +18,12 @@ interface HistoryPanelProps {
   /** 重新插入终端 */
   onInsert: (content: string) => void;
   showToast: (text: string, kind?: 'success' | 'error') => void;
+  /** 版本号变化时自动重新加载（命令执行后由 App 自增触发） */
+  version?: number;
 }
 
 /** 命令历史（requirements.md §12）：列表 / 搜索 / 删除 / 重新插入 */
-export function HistoryPanel({ onInsert, showToast }: HistoryPanelProps) {
+export function HistoryPanel({ onInsert, showToast, version = 0 }: HistoryPanelProps) {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,9 +43,11 @@ export function HistoryPanel({ onInsert, showToast }: HistoryPanelProps) {
   }, []);
 
   useEffect(() => {
-    void load();
+    void load(q.trim() || undefined);
     return () => window.clearTimeout(debounceRef.current);
-  }, [load]);
+    // version 变化（新命令执行）时自动刷新；q 变化由 onSearchChange 防抖处理
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [load, version]);
 
   const onSearchChange = (value: string) => {
     setQ(value);
@@ -127,16 +131,20 @@ export function HistoryPanel({ onInsert, showToast }: HistoryPanelProps) {
             {entries.map((entry) => (
               <div
                 key={entry.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => onInsert(entry.command)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') onInsert(entry.command);
-                }}
-                className="group cursor-pointer rounded-md border border-transparent px-2 py-1.5 hover:border-border hover:bg-accent/60"
-                title="点击重新插入到终端"
+                className="group rounded-md border border-transparent px-2 py-1.5 hover:border-border hover:bg-accent/60"
               >
-                <p className="truncate font-mono text-xs text-foreground">
+                {/* 仅命令文本区可点击插入；外层容器无 onClick/onKeyDown，
+                    避免删除按钮的点击/焦点事件冒泡误触发插入 */}
+                <p
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onInsert(entry.command)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') onInsert(entry.command);
+                  }}
+                  className="truncate font-mono text-xs text-foreground hover:underline"
+                  title="点击重新插入到终端"
+                >
                   {entry.command}
                 </p>
                 <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
