@@ -24,13 +24,13 @@
 
 ```text
 WebShell/
-├── AGENTS.md            # Agent 骨架规范（细则按需加载 docs/agent/）
+├── AGENTS.md            # Agent 骨架规范（细则按需加载 .dsh/skills/）
 ├── README.md
 ├── CHANGELOG.md         # 版本变更记录
 ├── SECURITY.md          # 安全模型与注意事项
 ├── LICENSE              # Apache-2.0
+├── .dsh/skills/          # Agent 细则 skill（git-commit-rules / testing-strategy 等）
 ├── docs/                 # 全部文档
-│   ├── agent/            # Agent 细则（git 提交 / 测试策略 / 开发流程）
 │   ├── project/          # 项目文档
 │   │   ├── requirements.md  # 需求规格说明书
 │   │   ├── CONTRACT.md      # 前后端接口契约（REST + WebSocket 消息格式 + 环境脚本约定）
@@ -84,7 +84,7 @@ cd backend && PYTHONPATH=. uv run python scripts/e2e_ssh_ws.py   # 后端真实 
 cd web && npx playwright test      # 前端核心旅程 E2E（真实浏览器 + 真实后端）
 ```
 
-测试分层与策略见 `docs/agent/testing-strategy.md`。
+测试分层与策略见 skill `testing-strategy`（`.dsh/skills/testing-strategy/`）。
 
 ## 文档索引
 

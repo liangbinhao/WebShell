@@ -6,14 +6,14 @@
 
 ## 1. 内容准入（控制本文件膨胀）
 
-**任何新规则要进入本文件，先过三问，全部满足才可写入；否则放 `docs/agent/` 细则，本文件只留指针：**
+**任何新规则要进入本文件，先过三问，全部满足才可写入；否则做成 skill（`.dsh/skills/<名>/SKILL.md`，含 YAML frontmatter），本文件只留指针：**
 
-1. **是否每次会话都需要？** 只特定任务用 → 细则文件。
-2. **是否一句话能说清？** 需例子/边界/多步说明 → 细则文件（可带 Bad/Good 示例）。
+1. **是否每次会话都需要？** 只特定任务用 → skill（按需加载）。
+2. **是否一句话能说清？** 需例子/边界/多步说明 → skill（可带 Bad/Good 示例）。
 3. **是否约束通用行为？** 只约束某模块/场景 → 对应文档（README/API 等）。
 
 **配套纪律**：
-- 修改已存在的细则时，优先更新细则文件，不回流本文件。
+- 修改已存在的细则时，优先更新对应 skill 文件，不回流本文件。
 - 新增小节前先评估：能否并入现有小节？能否压缩为一条？
 - 本文件目标控制在 ~150 行以内；超限时审查可下沉到细则的内容。
 
@@ -67,7 +67,7 @@
 * 测试失败应分析根因，不得盲目改测试。
 * 无法自动验证的内容（如纯视觉、需真实服务）必须明确说明。
 * 不得声称执行了未执行的测试或验证。
-* **完整测试策略（分层 / bug 先红后绿 / 前端分层 / E2E / AI 协作）：调用 skill `testing-strategy` 获取，涉及测试必读；`docs/agent/testing-strategy.md` 为同内容副本。**
+* **完整测试策略（分层 / bug 先红后绿 / 前端分层 / E2E / AI 协作）：调用 skill `testing-strategy` 获取，涉及测试必读。**
 
 ## 7. Dependencies
 
@@ -84,7 +84,7 @@
 * **任何 git 提交/推送/amend/rebase 操作前，先调用 skill `git-commit-rules` 加载完整规则再执行。**
 * 核心：改动**攒够一个逻辑单元**后，向用户展示 diff + 拟用提交信息，**用户确认后才 commit**；推送、amend、rebase（改写历史）同样需确认。不把 git 当保存按钮（未经确认不提交）。
 * 提交前检查工作区与 diff；不提交敏感信息、生成物、无关文件。
-* **完整规则（粒度 / 时机 / 格式 / 确认流程 / amend-rebase）：调用 skill `git-commit-rules` 获取；`docs/agent/git-commit-rules.md` 为同内容副本。**
+* **完整规则（粒度 / 时机 / 格式 / 确认流程 / amend-rebase）：调用 skill `git-commit-rules` 获取。**
 
 ## 10. Agent Collaboration
 
@@ -102,7 +102,7 @@
 - 暴露不确定性；列表 ≤ 5 项；禁"Great question / Hope this helps"类客套。
 - 汇报：完成了什么 / 改了哪些文件 / 测试结果 / 未解决问题 / 需确认事项。
 
-**完整细则（AI 输出规则 + 协作护栏 + 学习记录）：调用 skill `user-communication` 获取，涉及沟通必读；`docs/agent/user-communication.md` 为同内容副本。**
+**完整细则（AI 输出规则 + 协作护栏 + 学习记录）：调用 skill `user-communication` 获取，涉及沟通必读。**
 
 ## 12. Priority
 
@@ -124,13 +124,13 @@
 
 ---
 
-## 细则文档索引
+## 细则索引
 
-规则文件 = skill（AI 可加载）+ `docs/agent/` 镜像（人读副本，同内容）。
+细则即 skill，统一存放在 `.dsh/skills/<名>/SKILL.md`，AI 按需加载；不另设文档副本。
 
-| 主题 | Skill | 镜像 | 何时读 |
-|---|---|---|---|
-| Git 提交规则 | `git-commit-rules` | `docs/agent/git-commit-rules.md` | 每次提交/推送/改写历史前 |
-| 测试策略（分层/复现/E2E/AI） | `testing-strategy` | `docs/agent/testing-strategy.md` | 涉及测试、修 bug、写测试时 |
-| 开发流程与文档联动 | `feature-development` | `docs/agent/feature-development.md` | 功能开发时 |
-| 沟通协作（输出/护栏/学习记录） | `user-communication` | `docs/agent/user-communication.md` | 涉及沟通规范时 |
+| 主题 | Skill | 何时读 |
+|---|---|---|
+| Git 提交规则 | `git-commit-rules` | 每次提交/推送/改写历史前 |
+| 测试策略（分层/复现/E2E/AI） | `testing-strategy` | 涉及测试、修 bug、写测试时 |
+| 开发流程与文档联动 | `feature-development` | 功能开发时 |
+| 沟通协作（输出/护栏/学习记录） | `user-communication` | 涉及沟通规范时 |
