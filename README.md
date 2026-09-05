@@ -84,7 +84,7 @@ cd backend && PYTHONPATH=. uv run python scripts/e2e_ssh_ws.py   # 后端真实 
 cd web && npx playwright test      # 前端核心旅程 E2E（真实浏览器 + 真实后端）
 ```
 
-测试分层与策略见 `docs/agent/testing-policy.md`。
+测试分层与策略见 `docs/agent/testing-strategy.md`。
 
 ## 文档索引
 

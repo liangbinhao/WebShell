@@ -67,7 +67,7 @@
 * 测试失败应分析根因，不得盲目改测试。
 * 无法自动验证的内容（如纯视觉、需真实服务）必须明确说明。
 * 不得声称执行了未执行的测试或验证。
-* **完整测试策略（分层 / bug 先红后绿 / 前端分层 / E2E / AI 协作）：详见 `docs/agent/testing-policy.md`，涉及测试必读。**
+* **完整测试策略（分层 / bug 先红后绿 / 前端分层 / E2E / AI 协作）：调用 skill `testing-strategy` 获取，涉及测试必读；`docs/agent/testing-strategy.md` 为同内容副本。**
 
 ## 7. Dependencies
 
@@ -81,10 +81,10 @@
 
 ## 9. Git
 
-* **任何 git 提交/推送操作前，先调用 skill `git-policy` 加载完整规则再执行。**
-* 核心：改动**攒够一个逻辑单元**后，向用户展示 diff + 拟用提交信息，**用户确认后才 commit**；推送同样需确认。不把 git 当保存按钮（未经确认不提交）。
+* **任何 git 提交/推送/amend/rebase 操作前，先调用 skill `git-commit-rules` 加载完整规则再执行。**
+* 核心：改动**攒够一个逻辑单元**后，向用户展示 diff + 拟用提交信息，**用户确认后才 commit**；推送、amend、rebase（改写历史）同样需确认。不把 git 当保存按钮（未经确认不提交）。
 * 提交前检查工作区与 diff；不提交敏感信息、生成物、无关文件。
-* **完整规则（粒度 / 时机 / 格式 / 确认流程）：调用 skill `git-policy` 获取；`docs/agent/git-policy.md` 为同内容副本。**
+* **完整规则（粒度 / 时机 / 格式 / 确认流程 / amend-rebase）：调用 skill `git-commit-rules` 获取；`docs/agent/git-commit-rules.md` 为同内容副本。**
 
 ## 10. Agent Collaboration
 
@@ -102,7 +102,7 @@
 - 暴露不确定性；列表 ≤ 5 项；禁"Great question / Hope this helps"类客套。
 - 汇报：完成了什么 / 改了哪些文件 / 测试结果 / 未解决问题 / 需确认事项。
 
-**完整细则（AI 输出规则 + 协作护栏 + 学习记录）：详见 `docs/agent/communication-policy.md`，涉及沟通必读。**
+**完整细则（AI 输出规则 + 协作护栏 + 学习记录）：调用 skill `user-communication` 获取，涉及沟通必读；`docs/agent/user-communication.md` 为同内容副本。**
 
 ## 12. Priority
 
@@ -120,15 +120,17 @@
 
 护栏默认遵守（不判断用户是否新手）：动手前确认范围；破坏性操作双确认；卡壳超 3 轮换策略；不理解的代码解释到用户能复述再继续；概念总结。
 - 用户说"这块我已熟悉"→ 跳过详细解释；说"进入正常模式"→ 放宽解释类规则。
-- 学习记录（learned.md）位置与格式见 `docs/agent/communication-policy.md`。
+- 学习记录（learned.md）位置与格式见 skill `user-communication`。
 
 ---
 
 ## 细则文档索引
 
-| 主题 | 文件 | 何时读 |
-|---|---|---|
-| Git 提交规则 | `docs/agent/git-policy.md` | 每次提交前 |
-| 测试策略（分层/复现/E2E/AI） | `docs/agent/testing-policy.md` | 涉及测试、修 bug、写测试时 |
-| 开发流程与文档联动 | `docs/agent/development-workflow.md` | 功能开发时 |
-| 沟通协作（输出/护栏/学习记录） | `docs/agent/communication-policy.md` | 涉及沟通规范时 |
+规则文件 = skill（AI 可加载）+ `docs/agent/` 镜像（人读副本，同内容）。
+
+| 主题 | Skill | 镜像 | 何时读 |
+|---|---|---|---|
+| Git 提交规则 | `git-commit-rules` | `docs/agent/git-commit-rules.md` | 每次提交/推送/改写历史前 |
+| 测试策略（分层/复现/E2E/AI） | `testing-strategy` | `docs/agent/testing-strategy.md` | 涉及测试、修 bug、写测试时 |
+| 开发流程与文档联动 | `feature-development` | `docs/agent/feature-development.md` | 功能开发时 |
+| 沟通协作（输出/护栏/学习记录） | `user-communication` | `docs/agent/user-communication.md` | 涉及沟通规范时 |

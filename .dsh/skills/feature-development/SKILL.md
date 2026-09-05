@@ -1,13 +1,17 @@
-# 开发流程（细则）
+---
+name: feature-development
+description: 功能开发流程与文档联动规则。开始功能开发、改对外接口/行为、改 UI/外观/设置、需要同步文档前必读。含开发顺序、变更类型与文档对照表、"只改代码"禁止条款。
+whenToUse: 功能开发（新功能/修复/重构）、改动 REST/WebSocket 契约、UI/外观/设置项、模块 README 或 CHANGELOG 需要同步时。
+---
 
-> 主文件：`AGENTS.md`（§5 Code Changes 要点）。本文件为完整流程，**功能开发相关工作时必读**。
+# 开发流程与文档联动
 
 ## 功能开发顺序
 
 1. 定位需求文档对应章节（`docs/project/requirements.md`：功能需求 → 验收标准）；
 2. 明确接口契约：REST 路径、WebSocket 消息格式、数据模型（以 `docs/project/CONTRACT.md` 为准）；
 3. 后端先行实现（API / WebSocket / SSH 会话），再实现前端对接；
-4. 实现后补充或更新测试（见 `testing-policy.md`）；
+4. 实现后补充或更新测试（见 `testing-strategy` skill）；
 5. 更新受影响的文档（`docs/project/requirements.md`、`docs/project/API.md`、README 等）。
 
 ## 变更类型与文档联动

@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 /**
- * Web SSH Workspace E2E 配置（核心旅程，见 docs/agent/testing-policy.md）。
+ * Web SSH Workspace E2E 配置（核心旅程，见 docs/agent/testing-strategy.md）。
  *
  * 前置：后端与前端需已启动（项目根目录 ./script/run.sh）。
  * - 前端 http://127.0.0.1:5173（vite，/api 与 /ws 代理到 8000）
