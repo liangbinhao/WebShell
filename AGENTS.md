@@ -81,9 +81,10 @@
 
 ## 9. Git
 
+* **任何 git 提交/推送操作前，先调用 skill `git-policy` 加载完整规则再执行。**
+* 核心：改动**攒够一个逻辑单元**后，向用户展示 diff + 拟用提交信息，**用户确认后才 commit**；推送同样需确认。不把 git 当保存按钮（未经确认不提交）。
 * 提交前检查工作区与 diff；不提交敏感信息、生成物、无关文件。
-* **推送 GitHub 前必须经用户确认**；默认只提交本地。
-* **完整提交规则（粒度 / 时机 / 信息格式）：详见 `docs/agent/git-policy.md`，提交必读。**
+* **完整规则（粒度 / 时机 / 格式 / 确认流程）：调用 skill `git-policy` 获取；`docs/agent/git-policy.md` 为同内容副本。**
 
 ## 10. Agent Collaboration
 
