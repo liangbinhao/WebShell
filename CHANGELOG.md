@@ -13,6 +13,7 @@
 
 ### 变更
 
+- **开源协议由 Apache-2.0 改为 MIT**：`LICENSE` 替换为 MIT 全文，README 目录树与 License 段、`web/package.json` 的 `license` 字段同步
 - **`clean.sh` 不再删除数据**：只清理开发数据与生成物，新增 `--dry-run` 预览；删除统一经 `safe_rm_rf` 校验（仅限仓库内、拒绝含 `.live-data` 标记的目录）
 
 ### 修复

@@ -39,7 +39,7 @@ WebShell/
 ├── README.md
 ├── CHANGELOG.md         # 版本变更记录
 ├── SECURITY.md          # 安全模型与注意事项
-├── LICENSE              # Apache-2.0
+├── LICENSE              # MIT
 ├── .dsh/skills/          # Agent 细则 skill（git-commit-rules / testing-strategy 等）
 ├── docs/                 # 全部文档
 │   ├── project/          # 项目文档
@@ -139,4 +139,6 @@ cd web && npx playwright test      # 前端核心旅程 E2E（真实浏览器 + 
 
 ## License
 
-Apache-2.0
+[MIT](LICENSE)
+
+Copyright (c) 2026 liangbinhao
