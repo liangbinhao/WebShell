@@ -179,14 +179,29 @@ web/
 
 ### 8.2 项目脚本（WebShell/script/ 目录）
 
-四个脚本统一放在 `script/` 目录下（`script/build.sh` / `script/run.sh` / `script/stop.sh` / `script/clean.sh`），从项目根目录或任意位置以 `./script/xxx.sh` 调用（脚本内部自行定位项目根目录）：
+项目脚本统一放在 `script/` 目录下，从项目根目录或任意位置以 `./script/xxx.sh` 调用（脚本内部自行定位项目根目录）：
 
 | 脚本 | 行为 | 要求 |
 |---|---|---|
 | `build.sh` | 安装依赖并构建 | 后端：`uv pip install -r backend/requirements.txt`；前端：`npm install && npm run build`（在 web/ 下）；可重复执行 |
-| `run.sh` | 启动后端 + 前端 | 启动后端（uv run uvicorn 127.0.0.1:8000）与前端（dev 或静态服务）；记录 PID 到 `.run/` 目录；可重复执行（先 stop 旧的） |
+| `run.sh [--dev\|--prod]` | 启动后端 + 前端 | 默认 `--prod`：注入 `WS_DATA_DIR=<正式数据目录>`；`--dev`：注入仓库内开发数据目录；启动时打印环境与数据目录；PID 记录到 `.run/`；可重复执行（先 stop 旧的） |
 | `stop.sh` | 停止后端与前端 | 按 `.run/` 中记录的 PID 停止；无残留进程 |
-| `clean.sh` | 清理生成物 | 删除 backend/.venv、web/node_modules、web/dist、.run/、缓存与生成文件；**不删除源码** |
+| `clean.sh [--dry-run]` | 清理生成物与开发数据 | 删除 backend/.venv、backend/.data-dev、web/node_modules、web/dist、.run/、缓存与生成文件；**不删除源码、不触碰正式数据**；`--dry-run` 只预览 |
+| `backup.sh [--data-dir <路径>]` | 备份正式数据 | 打包为 `~/.webshell/backups/webshell-data-<时间戳>.tar.gz` 并校验可读 |
+| `migrate-data.sh [--dry-run] [--force]` | 仓库内历史数据迁移 | 把 `backend/data` **复制**到正式数据目录（保留源目录作备份；已存在文件默认跳过） |
+| `tests/test_data_isolation.sh` | 脚本自测 | 校验数据目录解析、安全删除边界、`clean.sh --dry-run` 不删数据 |
+
+**数据目录约定（环境隔离）**：
+
+| 用途 | 位置 | 是否会被 `clean.sh` 删除 |
+|---|---|---|
+| 正式（日常使用） | `${WS_DATA_HOME:-~/.webshell}/data`（仓库外） | ❌ 永不（路径在仓库外，且脚本拒绝删除含 `.live-data` 标记的目录） |
+| 开发 / 前端 E2E | `<仓库>/backend/.data-dev`（`run.sh --dev`） | ✅ 会 |
+| pytest / 后端 E2E | 进程内临时目录 | 用完即弃 |
+
+* 后端默认数据目录仍为 `backend/data`（直接 `uvicorn` 启动、不经 `run.sh` 时），`run.sh` 通过已有的 `WS_DATA_DIR` 环境变量注入实际目录——后端无需改动；
+* 所有目录删除统一经 `script/lib.sh` 的 `safe_rm_rf`：仅允许删除仓库内路径、且拒绝删除含 `.live-data` 标记的目录；
+* `secret.key` 是解密已存服务器密码的唯一密钥，迁移/备份必须保留（`cp -p` 保持 0600）。
 
 约定：脚本 `set -euo pipefail`、`chmod +x`、可从项目根目录执行、无交互提示（CI 友好）。
 

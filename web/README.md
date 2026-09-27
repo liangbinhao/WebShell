@@ -36,13 +36,14 @@ npm run dev
 
 ## 项目级脚本（WebShell/script/ 目录，CONTRACT.md §8.2）
 
-四个脚本统一放在项目根目录的 `script/` 下，从项目根目录执行：
+项目脚本统一放在项目根目录的 `script/` 下，从项目根目录执行：
 
 ```bash
 ./script/build.sh   # 安装依赖并构建（uv 后端依赖 + npm 前端）
-./script/run.sh     # 启动后端(8000) + 前端(5173)，PID 记录到 .run/
+./script/run.sh     # 启动后端(8000) + 前端(5173)，PID 记录到 .run/（默认正式数据）
+./script/run.sh --dev   # 同上，但使用开发数据 backend/.data-dev（前端 E2E 请用这个）
 ./script/stop.sh    # 按 .run/ 停止后端与前端
-./script/clean.sh   # 清理 backend/.venv、web/node_modules、web/dist、.run/ 等（不删源码）
+./script/clean.sh   # 清理 backend/.venv、backend/.data-dev、web/node_modules 等（不删源码、不碰正式数据）
 ```
 
 ## 目录结构

@@ -192,7 +192,8 @@ WebSocket 连接失败时，服务端先发 `{"type":"error","message":"Failed t
 
 | 变量 | 默认 | 说明 |
 |---|---|---|
-| `WS_DATA_DIR` | `backend/data` | 数据目录（servers/commands/history JSON + 加密密钥） |
+| `WS_DATA_DIR` | `backend/data`（直接启动后端时） | 数据目录（servers/commands/history JSON + 加密密钥）。经 `run.sh` 启动时由脚本注入：默认正式目录 `${WS_DATA_HOME:-~/.webshell}/data`，`run.sh --dev` 注入 `backend/.data-dev` |
+| `WS_DATA_HOME` | `~/.webshell` | 正式数据根目录（`run.sh` / `backup.sh` / `migrate-data.sh` 使用） |
 | `WS_KNOWN_HOSTS` | `~/.ssh/known_hosts` | Host key 校验文件 |
 | `WS_SSH_CONFIG` | `~/.ssh/config` | 导入来源 |
 

@@ -3,6 +3,9 @@
 # 跨平台：Windows（Git Bash）/ macOS / Linux
 # 后端提供 REST（/api）与 WebSocket（/ws）；前端 vite 将 /api、/ws 代理到后端。
 # PID 记录到 .run/；可重复执行（先 stop 旧的）；停止：./script/stop.sh
+# 用法：./script/run.sh [--dev|--prod]
+#   --prod（默认）正式数据，放在仓库外 ~/.webshell/data，项目命令不会删除
+#   --dev          开发数据，放在仓库内 backend/.data-dev，clean.sh 可清理
 set -euo pipefail
 
 # ---- 加载公共库 ----
@@ -13,6 +16,32 @@ cd "$WS_ROOT"
 ensure_utf8_console
 RUN_DIR="$(run_dir)"
 mkdir -p "$RUN_DIR"
+
+# ---- 环境选择：默认正式数据（仓库外），--dev 用开发数据（仓库内）----
+WS_ENV="prod"
+case "${1:-}" in
+  --dev) WS_ENV="dev" ;;
+  --prod) WS_ENV="prod" ;;
+  "")
+    ;;
+  *)
+    echo "用法：./script/run.sh [--dev|--prod]" >&2
+    exit 2
+    ;;
+esac
+
+if [ "$WS_ENV" = "dev" ]; then
+  WS_DATA_DIR="$(dev_data_dir)"
+  DATA_LABEL="开发数据（clean.sh 可清理）"
+  mkdir -p "$WS_DATA_DIR"
+else
+  WS_DATA_DIR="$(prod_data_dir)"
+  DATA_LABEL="正式数据（仓库外，脚本不会删除）"
+  mark_live_data_dir "$WS_DATA_DIR"
+fi
+export WS_DATA_DIR
+echo "==> 环境：$WS_ENV"
+echo "==> 数据目录：${WS_DATA_DIR}（${DATA_LABEL}）"
 
 # ---- uv 定位 ----
 UV_BIN="$(find_uv)" || {
@@ -65,4 +94,5 @@ echo ""
 echo "==> 服务已启动："
 echo "    后端  http://127.0.0.1:8000   (pid $(cat "$RUN_DIR/backend.pid"))"
 echo "    前端  http://127.0.0.1:5173   (pid $(cat "$RUN_DIR/frontend.pid"))"
+echo "    数据  ${WS_DATA_DIR}（${DATA_LABEL}）"
 echo "    停止：./script/stop.sh"

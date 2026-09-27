@@ -57,7 +57,7 @@ whenToUse: 涉及测试时（写测试、跑测试、修 bug 需复现、E2E 验
   2. 外观设置：切换主题 → 界面与终端配色联动变化；
   3. 命令库：点命令 → 插入激活终端；
   4. 终端字体：内置字体生效（`fonts.check`）。
-- 运行：`cd web && npx playwright test`（需后端已启动）。
+- 运行：`cd web && npx playwright test`（需后端已启动：用 `./script/run.sh --dev`，E2E 数据写入开发目录 `backend/.data-dev`，避免污染正式数据）。
 
 ## 与 AI 协作
 

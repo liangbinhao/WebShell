@@ -74,3 +74,54 @@ export_uv_local_dirs() {
 run_dir() {
   echo "$WS_ROOT/.run"
 }
+
+# ---- 数据目录策略（正式数据与开发/测试数据隔离）----
+# 正式（日常使用）数据放在仓库外：任何项目命令（clean/git clean/重新 clone）都碰不到；
+# 开发数据放在仓库内：clean.sh 可以安全删除。
+# 可用 WS_DATA_HOME 覆盖正式数据根目录（默认 ~/.webshell）。
+LIVE_DATA_MARKER=".live-data"
+
+# 正式数据目录（仓库外）
+prod_data_dir() {
+  echo "${WS_DATA_HOME:-$HOME/.webshell}/data"
+}
+
+# 开发数据目录（仓库内，可被 clean.sh 清理）
+dev_data_dir() {
+  echo "$WS_ROOT/backend/.data-dev"
+}
+
+# 给正式数据目录打标记：破坏性脚本见到该标记一律拒绝删除（双保险）
+# 标记写入失败不影响启动（目录本身在仓库外已受保护），仅提示
+mark_live_data_dir() {
+  mkdir -p "$1" 2>/dev/null || return 0
+  : >"$1/$LIVE_DATA_MARKER" 2>/dev/null ||
+    echo "!! 提示：无法写入正式数据标记（$1/${LIVE_DATA_MARKER}）" >&2
+  return 0
+}
+
+# 安全删除：只允许删除「仓库内」且「不含正式数据标记」的路径
+# 用法：safe_rm_rf <path>   （路径不存在时静默返回 0）
+safe_rm_rf() {
+  local target="$1" parent resolved
+  if [ ! -e "$target" ]; then
+    return 0
+  fi
+  parent="$(cd "$(dirname "$target")" 2>/dev/null && pwd)" || {
+    echo "!! 无法解析路径，跳过删除：$target" >&2
+    return 1
+  }
+  resolved="$parent/$(basename "$target")"
+  case "$resolved" in
+    "$WS_ROOT"/*) ;;
+    *)
+      echo "!! 拒绝删除仓库外路径：$target" >&2
+      return 1
+      ;;
+  esac
+  if [ -e "$resolved/$LIVE_DATA_MARKER" ]; then
+    echo "!! 拒绝删除含正式数据标记（${LIVE_DATA_MARKER}）的目录：$target" >&2
+    return 1
+  fi
+  rm -rf -- "$resolved"
+}

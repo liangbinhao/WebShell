@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+### 新增
+
+- **数据目录环境隔离**：正式数据移到仓库外 `~/.webshell/data`（`run.sh` 默认使用，`clean.sh`/`git clean`/重新 clone 均不影响）；开发数据放仓库内 `backend/.data-dev`（`run.sh --dev`）
+- **`script/backup.sh`**：备份正式数据为 tar.gz（`~/.webshell/backups/`），含解密密钥 `secret.key`
+- **`script/migrate-data.sh`**：把仓库内历史数据（`backend/data`）复制到正式数据目录，只复制、不删源
+- **`script/tests/test_data_isolation.sh`**：脚本自测（数据目录解析、安全删除边界、`clean.sh --dry-run`）
+
+### 变更
+
+- **`clean.sh` 不再删除数据**：只清理开发数据与生成物，新增 `--dry-run` 预览；删除统一经 `safe_rm_rf` 校验（仅限仓库内、拒绝含 `.live-data` 标记的目录）
+
 ### 计划中
 
 - Terminal Split（终端分屏，见需求 §9）

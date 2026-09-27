@@ -53,8 +53,12 @@ backend/
 
 ## 数据与配置
 
-- 数据目录：`backend/data/`（servers.json / commands.json / history.json + secret.key），**已被 .gitignore 排除，勿提交**
-- 环境变量：`WS_DATA_DIR`、`WS_KNOWN_HOSTS`、`WS_SSH_CONFIG`（详见 [doc/API.md §6](../docs/project/API.md)）
+- 数据目录（servers.json / commands.json / history.json + secret.key）：
+  - **正式（日常使用）**：`~/.webshell/data`（仓库外）——`script/run.sh` 默认注入；
+  - **开发 / 前端 E2E**：`backend/.data-dev`（仓库内）——`script/run.sh --dev` 注入，`clean.sh` 可清理；
+  - 直接 `uvicorn` 启动（不经 `run.sh`）时用默认 `backend/data/`（历史位置，保留作备份）。
+  - 以上均**已被 .gitignore 排除，勿提交**；环境隔离约定见 [CONTRACT.md §8.2](../docs/project/CONTRACT.md)。
+- 环境变量：`WS_DATA_DIR`、`WS_DATA_HOME`、`WS_KNOWN_HOSTS`、`WS_SSH_CONFIG`（详见 [API.md §6](../docs/project/API.md)）
 - 其他参数（超时、keepalive、历史上限、CORS）见 `app/config/settings.py`
 
 ## API

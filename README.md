@@ -38,9 +38,12 @@ WebShell/
 │   └── novice/           # 新手指南（本机，不入 git）
 ├── script/              # 项目脚本
 │   ├── build.sh         # 安装依赖并构建
-│   ├── run.sh           # 启动后端 + 前端
+│   ├── run.sh           # 启动后端 + 前端（默认正式数据；--dev 用开发数据）
 │   ├── stop.sh          # 停止服务
-│   └── clean.sh         # 清理生成物
+│   ├── clean.sh         # 清理生成物与开发数据（不删源码；--dry-run 预览）
+│   ├── backup.sh        # 备份正式数据（tar.gz）
+│   ├── migrate-data.sh  # 仓库内历史数据 → 正式数据目录（只复制）
+│   └── tests/           # 脚本自测（数据隔离 / 安全删除）
 ├── backend/             # FastAPI 后端（app/ + tests/ + scripts/）
 └── web/                 # React 前端（src/ + e2e/ 核心旅程 E2E）
 ```
@@ -71,16 +74,36 @@ cd WebShell
 ### 停止与清理
 
 ```bash
-./script/stop.sh    # 停止服务
-./script/clean.sh   # 清理生成物（.venv / node_modules / dist / 数据目录，不删源码）
+./script/stop.sh         # 停止服务
+./script/clean.sh        # 清理生成物与开发数据（不删源码、不碰正式数据）
+./script/clean.sh --dry-run   # 预览将删除的内容
 ```
+
+### 数据目录与环境隔离
+
+| 用途 | 位置 | 说明 |
+|---|---|---|
+| **正式（日常使用）** | `~/.webshell/data` | 仓库外；`clean.sh`、`git clean`、重新 clone 都不会影响；首次 `run.sh` 自动创建 |
+| **开发 / 前端 E2E** | `backend/.data-dev` | 仓库内；`clean.sh` 会清理；用 `run.sh --dev` 启动 |
+| pytest / 后端 E2E | 临时目录 | 测试各自隔离，不碰上述两份数据 |
+
+```bash
+./script/run.sh                # 正式数据（默认）
+./script/run.sh --dev          # 开发数据
+./script/backup.sh             # 备份正式数据 → ~/.webshell/backups/
+./script/migrate-data.sh       # 老数据（backend/data）→ 正式数据目录（只复制、不删源）
+./script/tests/test_data_isolation.sh   # 校验隔离与安全删除保护
+```
+
+数据目录可用 `WS_DATA_DIR` 覆盖；正式数据根目录可用 `WS_DATA_HOME` 覆盖（约定见 [CONTRACT.md §8.2](docs/project/CONTRACT.md)）。
 
 ## 测试
 
 ```bash
 cd backend && uv run pytest        # 后端单元 + API/集成（94 个用例）
 cd backend && PYTHONPATH=. uv run python scripts/e2e_ssh_ws.py   # 后端真实 SSH 端到端（跨平台）
-./script/run.sh                    # E2E 前置：启动前后端
+./script/tests/test_data_isolation.sh   # 脚本自测：数据隔离与安全删除保护
+./script/run.sh --dev              # 前端 E2E 前置：用开发数据启动前后端
 cd web && npx playwright test      # 前端核心旅程 E2E（真实浏览器 + 真实后端）
 ```
 

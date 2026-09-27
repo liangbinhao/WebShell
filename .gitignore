@@ -19,7 +19,9 @@ build/
 .DS_Store
 
 # backend data (encrypted secrets, keys)
+# 正式数据在仓库外（~/.webshell/data，见 script/lib.sh）；以下为仓库内历史/开发数据
 backend/data/
+backend/.data-dev/
 backend/.venv/
 
 # run state (PIDs / logs written by run.sh)
