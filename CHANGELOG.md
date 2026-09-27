@@ -17,6 +17,7 @@
 
 ### 修复
 
+- **确认对话框点击"确认"后不关闭**：`ConfirmDialog` 在确认按钮上调用 `preventDefault()`，而 Radix 的 `AlertDialog.Action` 依赖默认行为关闭弹窗，导致确认后弹窗停留（只有"取消"能关）。影响清空历史、删除历史/命令/服务器等全部确认弹窗。已移除 `preventDefault`，`confirmVariant` 真正生效，描述支持换行；新增 E2E 回归 `web/e2e/confirm-dialog.spec.ts`
 - **安全：密码提示的输入不再记入命令历史**。`su` / `sudo` / `passwd` / `mysql -p` 等在读取密码时远端关闭回显，此前前端仍会把本地缓冲的内容当作"命令"写入历史。现在识别密码提示行（`web/src/lib/secretPrompt.ts`）后跳过记录并清空缓冲；新增 `DELETE /api/history` 与历史面板"清空全部历史"按钮，便于清理已误记录的敏感内容
 
 ### 计划中
