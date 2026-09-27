@@ -304,6 +304,10 @@ class HistoryRepo(Collection):
         self._store.save(items)
         return record
 
+    def clear(self) -> None:
+        """清空全部历史（用于清理误记录的敏感内容，如密码提示的输入）。"""
+        self._store.save([])
+
 
 # ---------------------------------------------------------------- container
 

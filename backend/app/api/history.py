@@ -35,6 +35,12 @@ def add_history(payload: HistoryCreate, request: Request):
     return HistoryOut.from_record(record)
 
 
+@router.delete("", status_code=204)
+def clear_history(request: Request):
+    """清空全部历史（用于清理误记录的敏感输入，如 su/sudo 的密码）。"""
+    _storage(request).history.clear()
+
+
 @router.delete("/{history_id}", status_code=204)
 def delete_history(history_id: str, request: Request):
     storage = _storage(request)

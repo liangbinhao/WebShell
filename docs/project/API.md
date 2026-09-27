@@ -121,6 +121,7 @@ curl -X POST http://127.0.0.1:8000/api/servers \
 | GET | `/api/history` | 列表（`?q=` 搜索命令、`?server_id=` 过滤、`?limit=` 限制条数；最新在前，默认上限 100） | `200` `HistoryOut[]` |
 | POST | `/api/history` | 记录一条（前端在用户执行命令时调用；**同服务器同命令去重**，保留最近 200 条） | `201` `HistoryOut` |
 | DELETE | `/api/history/{id}` | 删除一条 | `204` 无内容 |
+| DELETE | `/api/history` | 清空全部历史（用于清理误记录的敏感输入，如 su/sudo 密码） | `204` 无内容 |
 
 示例（记录历史）：
 

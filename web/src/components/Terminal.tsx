@@ -18,6 +18,7 @@ import {
   resolveTerminalThemeId,
   type AppearanceSettings,
 } from '../lib/appearance';
+import { isSecretPrompt } from '../lib/secretPrompt';
 
 export interface TerminalHandle {
   /** 向终端插入文本（不自动执行，用户按 Enter 执行） */
@@ -95,6 +96,20 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
     // 处理用户输入：转发 + 历史识别
     const handleData = useCallback(
       (data: string) => {
+        // 读取光标所在行的原始文本：用于识别密码提示（su/sudo/passwd 等），
+        // 这类提示下远端关闭回显，但本地缓冲仍会累积按键，必须靠屏幕提示判断。
+        const readCursorLine = (): string => {
+          const term = termRef.current;
+          if (!term) return '';
+          try {
+            const buffer = term.buffer.active;
+            const line = buffer.getLine(buffer.cursorY);
+            return line ? line.translateToString(false).trimEnd() : '';
+          } catch {
+            return '';
+          }
+        };
+
         // 从 xterm buffer 读取当前行的完整文本（含远端 Tab 补全/方向键调出的历史）。
         // 必须在 Enter 发送前读取——发送后远端回显换行，buffer 光标行已不在命令行上。
         const readScreenCommand = (): string | null => {
@@ -131,7 +146,9 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
         if (data === '\r') {
           // Enter：先读屏幕行（Enter 前的完整命令行，含补全/方向键调出的历史），
           // 再发送 Enter（发送后远端回显换行，行内容即失效）。
-          const screenCmd = readScreenCommand();
+          // 密码提示（su/sudo/passwd...）下绝不记录：输入的是密码，不是命令。
+          const secret = isSecretPrompt(readCursorLine());
+          const screenCmd = secret ? null : readScreenCommand();
           const typed = inputBufferRef.current.trim();
           inputBufferRef.current = '';
           // 屏幕行命令必须"以用户输入为前缀"才可信（说明是同一命令行被补全/历史扩展），
@@ -146,10 +163,15 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
             cmd = typed || screenCmd || '';
           }
           send({ type: 'input', data });
-          if (cmd) onCommandRef.current(cmd);
+          if (!secret && cmd) onCommandRef.current(cmd);
         } else if (data.includes('\r')) {
           // 粘贴的多行文本（先发再处理缓存，多行中每个 Enter 都应执行）
           send({ type: 'input', data });
+          // 密码提示下：多行粘贴同样不记录，并清空缓冲避免串入后续命令
+          if (isSecretPrompt(readCursorLine())) {
+            inputBufferRef.current = '';
+            return;
+          }
           const parts = data.split('\r');
           const first = (inputBufferRef.current + parts[0]).trim();
           inputBufferRef.current = '';
@@ -164,9 +186,12 @@ const TerminalComponent = forwardRef<TerminalHandle, TerminalProps>(
             // Ctrl+C / Ctrl+D / Ctrl+L：中止当前输入
             inputBufferRef.current = '';
           } else if (!data.startsWith('\x1b') && data !== '\r') {
-            // 可打印字符；转义序列（方向键等）不进入历史缓存
+            // 可打印字符；转义序列（方向键等）不进入历史缓存。
+            // 密码提示下不累积——否则密码会留在缓冲里被下一条命令带出。
             const printable = data.replace(/[\x00-\x1f\x7f]/g, '');
-            if (printable) inputBufferRef.current += printable;
+            if (printable && !isSecretPrompt(readCursorLine())) {
+              inputBufferRef.current += printable;
+            }
           }
         }
       },

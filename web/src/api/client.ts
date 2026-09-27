@@ -117,4 +117,6 @@ export const historyApi = {
   /** DELETE /api/history/{id} */
   remove: (id: string) =>
     request<void>(`/api/history/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  /** DELETE /api/history —— 清空全部历史 */
+  clear: () => request<void>('/api/history', { method: 'DELETE' }),
 };

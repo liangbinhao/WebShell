@@ -2,6 +2,17 @@
 
 个人使用的 Web SSH 运维工作台：通过浏览器统一管理多台 Linux 服务器，提供接近原生 Shell 的交互式终端体验。
 
+> **开发方式：AI 协作开发（AI-assisted development）**
+>
+> 本项目从需求梳理到实现、测试与文档，均由**人工 + AI Agent 协作**完成：
+> - **人工负责**：需求与验收标准、方案评审、破坏性操作与提交的确认、最终验收；
+> - **AI 负责**：代码实现、测试编写、文档同步、问题排查；
+> - **协作规则**：骨架规则见 [AGENTS.md](AGENTS.md)，细则以 skill 形式放在 [.dsh/skills/](.dsh/skills/)（按需加载，如 `git-commit-rules`、`testing-strategy`、`feature-development`、`user-communication`）；
+> - **提交纪律**：改动攒够一个逻辑单元 → 展示 diff 与提交信息 → **人工确认后才提交/推送**（AI 不把 git 当保存按钮）；
+> - **运行环境**：Agent 通过 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）驱动，项目内 `.dsh/` 即为该环境的配置目录。
+>
+> 因此仓库历史中可能出现 AI 生成的代码与文档；所有入库内容均经人工确认。
+
 ## 功能特性
 
 - **多 Tab 终端**：每个 Tab 独立 SSH 会话，切换不断开，支持 vim / top / tmux 等交互式程序

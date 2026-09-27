@@ -58,3 +58,14 @@ def test_delete_history(client):
     assert client.delete(f"/api/history/{data['id']}").status_code == 204
     assert client.get("/api/history").json() == []
     assert client.delete(f"/api/history/{data['id']}").status_code == 404
+
+
+def test_clear_history(client):
+    """清空全部历史：用于清理误记录的敏感输入（如 su/sudo 密码）。"""
+    add_history(client, command="first")
+    add_history(client, command="second")
+    assert client.delete("/api/history").status_code == 204
+    assert client.get("/api/history").json() == []
+    # 清空后可继续正常记录，不残留旧数据
+    add_history(client, command="third")
+    assert [x["command"] for x in client.get("/api/history").json()] == ["third"]

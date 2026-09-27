@@ -93,6 +93,11 @@
 | GET | `/api/history` | 历史列表（`?q=` 搜索命令内容；`?server_id=` 过滤） |
 | POST | `/api/history` | 记录一条历史（前端在用户执行命令时调用） |
 | DELETE | `/api/history/{id}` | 删除一条历史 |
+| DELETE | `/api/history` | 清空全部历史（用于清理误记录的敏感输入，如 su/sudo 密码） |
+
+**敏感输入不入历史**：`su` / `sudo` / `passwd` / `mysql -p` 等密码提示下远端关闭回显，
+前端必须识别提示行（`web/src/lib/secretPrompt.ts`）并跳过记录、清空输入缓冲；
+识别规则用 `web/e2e/secret-prompt.spec.ts` 单测锁定。
 
 ## 4. WebSocket 终端（/ws/terminal）
 

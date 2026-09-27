@@ -67,6 +67,16 @@ export function HistoryPanel({ onInsert, showToast, version = 0 }: HistoryPanelP
     }
   };
 
+  const clearAll = async () => {
+    try {
+      await historyApi.clear();
+      setEntries([]);
+      showToast('历史记录已清空');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : '清空失败', 'error');
+    }
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* 头部 */}
@@ -76,7 +86,24 @@ export function HistoryPanel({ onInsert, showToast, version = 0 }: HistoryPanelP
         <span className="rounded bg-muted px-1.5 text-xs text-muted-foreground">
           {entries.length}
         </span>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-0.5">
+          <ConfirmDialog
+            title="清空全部历史"
+            description={`确定清空全部 ${entries.length} 条历史记录？此操作不可撤销。\n（若历史中含误记录的密码等内容，建议清空后重新执行 ./script/backup.sh）`}
+            confirmText="清空"
+            trigger={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 hover:text-destructive"
+                title="清空全部历史"
+                disabled={entries.length === 0}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            }
+            onConfirm={() => void clearAll()}
+          />
           <Button
             variant="ghost"
             size="icon"
